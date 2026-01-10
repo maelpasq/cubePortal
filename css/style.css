@@ -1,0 +1,204 @@
+:root {
+    --bg: #0b1021;
+    --panel: rgba(15, 19, 41, 0.6);
+    --primary: #5cf0c5;
+    --accent: #7bb6ff;
+    --muted: #c6d1e7;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", "Inter", system-ui, -apple-system, sans-serif;
+    background: radial-gradient(circle at 20% 20%, #13244b, transparent 30%),
+        radial-gradient(circle at 80% 0%, #1a4b3c, transparent 35%),
+        radial-gradient(circle at 70% 75%, #1e2b52, transparent 40%), var(--bg);
+    color: #f5f7ff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    overflow: hidden;
+}
+
+.grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.06) 1px,
+            transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(circle at center,
+            rgba(0, 0, 0, 0.5) 0%,
+            transparent 70%);
+    pointer-events: none;
+}
+
+.shell {
+    position: relative;
+    max-width: 880px;
+    width: 100%;
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    padding: 36px;
+    backdrop-filter: blur(14px);
+    box-shadow: 0 25px 90px rgba(0, 0, 0, 0.45);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--muted);
+    font-size: 13px;
+    letter-spacing: 0.4px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: linear-gradient(120deg, var(--primary), var(--accent));
+    box-shadow: 0 0 0 6px rgba(92, 240, 197, 0.15);
+    animation: pulse 2.4s infinite;
+}
+
+h1 {
+    margin: 18px 0 12px;
+    font-size: clamp(34px, 5vw, 46px);
+    letter-spacing: -0.5px;
+}
+
+p.lead {
+    margin: 0 0 28px;
+    color: var(--muted);
+    font-size: 17px;
+    line-height: 1.6;
+    max-width: 640px;
+}
+
+.cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.btn {
+    padding: 13px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #0a0f1f;
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(92, 240, 197, 0.35);
+    transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.btn.secondary {
+    background: transparent;
+    color: #f5f7ff;
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: none;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(92, 240, 197, 0.45);
+}
+
+.btn.secondary:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.status span {
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.card {
+    padding: 18px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.card h3 {
+    margin: 0 0 8px;
+    color: #f5f7ff;
+    font-size: 16px;
+}
+
+footer {
+    margin-top: 30px;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 13px;
+}
+
+footer a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+footer a:hover {
+    text-decoration: underline;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 6px rgba(92, 240, 197, 0.18);
+    }
+
+    50% {
+        box-shadow: 0 0 0 12px rgba(92, 240, 197, 0.08);
+    }
+
+    100% {
+        box-shadow: 0 0 0 6px rgba(92, 240, 197, 0.18);
+    }
+}
+
+@media (max-width: 540px) {
+    .shell {
+        padding: 26px;
+    }
+
+    .cta {
+        flex-direction: column;
+    }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
