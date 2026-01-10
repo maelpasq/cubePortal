@@ -1,0 +1,11 @@
+# Ignore sensitive config overrides
+config/.env.php
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Logs
+*.log
