@@ -1,7 +1,12 @@
 <?php
 $title = 'Cube Portal - Connexion';
-$bodyClass = 'auth';
+$bodyClass = '';
 $useTailwind = true;
+
+if (current_user($pdo)) {
+    header('Location: /dashboard');
+    exit;
+}
 
 if (is_post()) {
     if (!csrf_verify($_POST['csrf_token'] ?? null)) {

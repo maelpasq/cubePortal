@@ -1,7 +1,7 @@
 <?php
 $title = $title ?? 'Cube Portal';
 $bodyClass = $bodyClass ?? '';
-$useTailwind = $useTailwind ?? false;
+$useTailwind = $useTailwind ?? true;
 ?>
 <!doctype html>
 <html lang="fr">
