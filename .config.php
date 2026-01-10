@@ -2,7 +2,7 @@
 // Hidden config file for DB credentials.
 return [
     'db' => [
-        'dsn' => 'mysql:host=mysql-pamal-studio.alwaysdata.net;dbname=pamal-studio_cube_portal;charset=utf8mb4',
+        'dsn' => 'mysql:host=mysql-pamal-studio.alwaysdata.net;port=3306;dbname=pamal-studio_cube_portal;charset=utf8mb4',
         'user' => '392241',
         'pass' => 'pa19mal09Studio2024!',
         'options' => [
