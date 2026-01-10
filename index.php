@@ -12,7 +12,7 @@ function handle_login(string $method): void
 
     if ($method === 'POST') {
         if (!verify_csrf($_POST['csrf_token'] ?? null)) {
-            render('login', ['error' => 'Requete invalide, merci de reessayer.']);
+            render('login', ['error' => 'Requête invalide, merci de réessayer.']);
             return;
         }
 
@@ -84,7 +84,7 @@ function admin_page(string $method): void
             } elseif (!filter_var($formValues['email'], FILTER_VALIDATE_EMAIL)) {
                 $formError = 'Email invalide.';
             } elseif (strlen($password) < 8) {
-                $formError = 'Le mot de passe doit faire au moins 8 caracteres.';
+                $formError = 'Le mot de passe doit faire au moins 8 caractères.';
             } else {
                 try {
                     $stmt = db()->prepare('INSERT INTO users (name, email, password_hash, role) VALUES (:name, :email, :password_hash, :role)');
@@ -94,13 +94,13 @@ function admin_page(string $method): void
                         ':password_hash' => password_hash($password, PASSWORD_DEFAULT),
                         ':role' => $formValues['role'],
                     ]);
-                    set_flash('success', 'Compte cree avec succes.');
+                    set_flash('success', 'Compte créé avec succès.');
                     redirect('admin');
                 } catch (PDOException $e) {
                     if ($e->getCode() === '23000') {
-                        $formError = 'Un compte existe deja avec cet email.';
+                        $formError = 'Un compte existe déjà avec cet email.';
                     } else {
-                        $formError = 'Erreur lors de la creation du compte.';
+                        $formError = 'Erreur lors de la création du compte.';
                     }
                 }
             }
@@ -149,5 +149,5 @@ if ($path === 'admin') {
 http_response_code(404);
 render('error', [
     'title' => 'Page introuvable',
-    'message' => 'La page demandee nest pas disponible.',
+    'message' => 'La page demandée n’est pas disponible.',
 ]);

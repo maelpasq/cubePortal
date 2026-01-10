@@ -7,7 +7,13 @@ if (!file_exists($configPath)) {
 }
 
 $GLOBALS['cube_config'] = require $configPath;
-$GLOBALS['cube_base_url'] = rtrim($GLOBALS['cube_config']['app']['base_url'] ?? '/', '/') ?: '/';
+$configuredBase = $GLOBALS['cube_config']['app']['base_url'] ?? null;
+if (is_string($configuredBase) && $configuredBase !== '') {
+    $GLOBALS['cube_base_url'] = rtrim($configuredBase, '/') ?: '/';
+} else {
+    $scriptDir = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+    $GLOBALS['cube_base_url'] = $scriptDir === '' || $scriptDir === '.' ? '/' : $scriptDir;
+}
 
 $secureCookie = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['SERVER_PORT'] ?? '') === '443');
 session_set_cookie_params([
@@ -70,8 +76,8 @@ function db(): PDO
         ]);
     } catch (PDOException $e) {
         http_response_code(500);
-        echo '<h1>Connexion base de donnees indisponible</h1>';
-        echo '<p>Verifiez config/.env.php et importez database.sql.</p>';
+        echo '<h1>Connexion base de données indisponible</h1>';
+        echo '<p>Vérifiez config/.env.php et importez database.sql.</p>';
         exit;
     }
 
@@ -85,7 +91,7 @@ function ensure_admin_seed(): void
     } catch (PDOException $e) {
         if ($e->getCode() === '42S02') {
             http_response_code(500);
-            echo '<h1>Base non initialisee</h1>';
+            echo '<h1>Base non initialisée</h1>';
             echo '<p>Importez database.sql via phpMyAdmin puis rechargez la page.</p>';
             exit;
         }
@@ -199,7 +205,7 @@ function current_user(): ?array
 function require_auth(): void
 {
     if (!current_user()) {
-        set_flash('warning', 'Connectez-vous pour acceder a cette page.');
+        set_flash('warning', 'Connectez-vous pour accéder à cette page.');
         redirect('login');
     }
 }
@@ -210,7 +216,7 @@ function require_admin(): void
     if (!$user || $user['role'] !== 'admin') {
         http_response_code(403);
         render('error', [
-            'title' => 'Acces refuse',
+            'title' => 'Accès refusé',
             'message' => "Vous n'avez pas les droits suffisants pour cette zone.",
         ]);
         exit;

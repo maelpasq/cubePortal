@@ -1,15 +1,15 @@
 <?php $title = 'Connexion'; ?>
 <section class="auth-card">
     <div class="auth-header">
-        <p class="eyebrow">Securise</p>
+        <p class="eyebrow">Sécurisé</p>
         <h1>Connexion Cube Portal</h1>
-        <p class="helper">Acces reserve aux membres du projet Cube.</p>
+        <p class="helper">Accès réservé aux membres du projet Cube.</p>
     </div>
     <?php if (!empty($error)): ?>
         <div class="flash danger"><?= e($error) ?></div>
     <?php endif; ?>
     <?php if (isset($_GET['timeout'])): ?>
-        <div class="flash warning">Session expiree, merci de vous reconnecter.</div>
+        <div class="flash warning">Session expirée, merci de vous reconnecter.</div>
     <?php endif; ?>
     <form class="form" action="<?= base_url('login') ?>" method="post" novalidate>
         <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
@@ -24,6 +24,6 @@
         <button type="submit" class="primary-btn full">Se connecter</button>
     </form>
     <div class="auth-footer">
-        <a href="<?= base_url('') ?>" class="ghost-btn small">Retour a la landing</a>
+        <a href="<?= base_url('') ?>" class="ghost-btn small">Retour à la landing</a>
     </div>
 </section>

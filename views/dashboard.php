@@ -8,23 +8,23 @@
     <article class="card">
         <p class="eyebrow">Admins</p>
         <h2><?= (int) ($stats['admin_count'] ?? 0) ?></h2>
-        <p class="helper">Espace admin reserve au premier compte.</p>
+        <p class="helper">Espace admin réservé au premier compte.</p>
     </article>
     <article class="card">
-        <p class="eyebrow">Securite</p>
+        <p class="eyebrow">Sécurité</p>
         <h2>En place</h2>
-        <p class="helper">Sessions protegees, CSRF, mots de passe hashes.</p>
+        <p class="helper">Sessions protégées, CSRF, mots de passe hashés.</p>
     </article>
 </section>
 
 <section class="panel">
     <header class="panel-head">
         <div>
-            <p class="eyebrow">Activite recente</p>
+            <p class="eyebrow">Activité récente</p>
             <h3>Nouveaux comptes</h3>
         </div>
         <?php if ($user && $user['role'] === 'admin'): ?>
-            <a class="ghost-btn small" href="<?= base_url('admin') ?>">Gerer les comptes</a>
+            <a class="ghost-btn small" href="<?= base_url('admin') ?>">Gérer les comptes</a>
         <?php endif; ?>
     </header>
     <?php if (!empty($stats['recent_users'])): ?>
@@ -32,8 +32,8 @@
             <div class="table-head">
                 <span>Nom</span>
                 <span>Email</span>
-                <span>Role</span>
-                <span>Cree le</span>
+                <span>Rôle</span>
+                <span>Créé le</span>
             </div>
             <?php foreach ($stats['recent_users'] as $recent): ?>
                 <div class="table-row">
@@ -45,6 +45,6 @@
             <?php endforeach; ?>
         </div>
     <?php else: ?>
-        <p class="helper">Aucun compte pour le moment. Creez le premier via l espace admin.</p>
+        <p class="helper">Aucun compte pour le moment. Créez le premier via l’espace admin.</p>
     <?php endif; ?>
 </section>

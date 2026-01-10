@@ -1,6 +1,6 @@
--- Schema Cube Portal
+-- Schéma Cube Portal
 -- Importez ce fichier dans phpMyAdmin avant de lancer l'application.
--- Le premier compte admin sera cree automatiquement par l'application si la table est vide (config.security.initial_admin_*).
+-- Le premier compte admin sera créé automatiquement par l'application si la table est vide (config.security.initial_admin_*).
 
 CREATE TABLE IF NOT EXISTS users (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

@@ -5,5 +5,5 @@ RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]
 
-# Reecriture vers le front controller
+# Réécriture vers le front controller
 RewriteRule ^ index.php [QSA,L]

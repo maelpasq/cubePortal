@@ -11,8 +11,8 @@
             <div class="table-head">
                 <span>Nom</span>
                 <span>Email</span>
-                <span>Role</span>
-                <span>Cree le</span>
+                <span>Rôle</span>
+                <span>Créé le</span>
             </div>
             <?php foreach ($users as $account): ?>
                 <div class="table-row">
@@ -32,7 +32,7 @@
     <header class="panel-head">
         <div>
             <p class="eyebrow">Gestion</p>
-            <h3>Creer un compte</h3>
+            <h3>Créer un compte</h3>
         </div>
     </header>
     <?php if (!empty($formError)): ?>
@@ -42,7 +42,7 @@
         <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
         <label class="field">
             <span>Nom complet</span>
-            <input type="text" name="name" required placeholder="Nom Prenom" value="<?= e($formValues['name'] ?? '') ?>">
+            <input type="text" name="name" required placeholder="Nom Prénom" value="<?= e($formValues['name'] ?? '') ?>">
         </label>
         <label class="field">
             <span>Email</span>
@@ -50,15 +50,15 @@
         </label>
         <label class="field">
             <span>Mot de passe</span>
-            <input type="password" name="password" required minlength="8" placeholder="Minimum 8 caracteres">
+            <input type="password" name="password" required minlength="8" placeholder="Minimum 8 caractères">
         </label>
         <label class="field">
-            <span>Role</span>
+            <span>Rôle</span>
             <select name="role" required>
                 <option value="member" <?= (isset($formValues['role']) && $formValues['role'] === 'member') ? 'selected' : '' ?>>Membre</option>
                 <option value="admin" <?= (isset($formValues['role']) && $formValues['role'] === 'admin') ? 'selected' : '' ?>>Admin</option>
             </select>
         </label>
-        <button type="submit" class="primary-btn full">Creer le compte</button>
+        <button type="submit" class="primary-btn full">Créer le compte</button>
     </form>
 </section>

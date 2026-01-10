@@ -40,13 +40,13 @@ $isDashboardShell = $isAuthenticated && in_array($viewName, ['dashboard', 'admin
                         <div class="user-role"><?= e($user['role']) ?></div>
                     </div>
                 </div>
-                <a class="side-link danger" href="<?= base_url('logout') ?>">Se deconnecter</a>
+                <a class="side-link danger" href="<?= base_url('logout') ?>">Se déconnecter</a>
             </div>
         </aside>
         <div class="app-content">
             <header class="app-topbar">
                 <div>
-                    <p class="eyebrow">Connecte</p>
+                    <p class="eyebrow">Connecté</p>
                     <h1 class="page-title"><?= e($pageTitle) ?></h1>
                 </div>
                 <div class="top-actions">
@@ -74,8 +74,8 @@ $isDashboardShell = $isAuthenticated && in_array($viewName, ['dashboard', 'admin
             </div>
         </div>
         <nav>
-            <a href="#features">Fonctionnalites</a>
-            <a href="#security">Securite</a>
+            <a href="#features">Fonctionnalités</a>
+            <a href="#security">Sécurité</a>
             <a href="<?= base_url('login') ?>" class="primary-btn small">Connexion</a>
         </nav>
     </header>
