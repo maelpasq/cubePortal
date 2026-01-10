@@ -1,16 +1,14 @@
-# Hide .php extensions and route simple paths to their .php counterparts
-<IfModule mod_rewrite.c>
-  RewriteEngine On
-  # If request matches an existing file or directory, serve it
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^([A-Za-z0-9_\-/]+)/?$ $1.php [L,QSA]
-</IfModule>
+RewriteEngine On
 
-# Deny direct access to the config file
-<Files ".env.php">
-  Require all denied
-</Files>
+# 1. Hide .php extension
+# To view /file, request /file
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
 
-# Deny access to the config directory via redirect-match as fallback
-RedirectMatch 403 ^/config/.*$
+# 2. Block access to sensitive directories
+RewriteRule ^(config|sql|includes)/ - [F,L]
+RewriteRule ^(\.env|\.git) - [F,L]
+
+# 3. Prevent directory listing
+Options -Indexes
