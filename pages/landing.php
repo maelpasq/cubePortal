@@ -63,11 +63,6 @@ $user = current_user($pdo);
     </div>
 </section>
 
-<section id="about" class="section section--muted">
-    <h2>A propos</h2>
-    <p>Cube Portal est un SaaS interne concu pour rendre les informations du projet Cube accessibles, structurees et actionnables par les equipes CESI.</p>
-</section>
-
 <footer class="footer">
     <span>Cube Portal (c) <?= date('Y') ?></span>
 </footer>

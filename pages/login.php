@@ -1,6 +1,7 @@
 <?php
 $title = 'Cube Portal - Connexion';
 $bodyClass = 'auth';
+$useTailwind = true;
 
 if (is_post()) {
     if (!csrf_verify($_POST['csrf_token'] ?? null)) {
@@ -34,29 +35,48 @@ if (is_post()) {
 
 require __DIR__ . '/../templates/head.php';
 ?>
-<div class="auth__container">
-    <div class="auth__card">
-        <div class="auth__header">
-            <div class="logo">Cube Portal</div>
-            <p>Connexion a votre espace securise</p>
+<div class="min-h-screen bg-[#f6f1eb] text-[#0f0f0f]">
+    <div class="mx-auto grid min-h-screen max-w-6xl grid-cols-1 lg:grid-cols-2">
+        <div class="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
+            <div class="max-w-md">
+                <div class="mb-8">
+                    <p class="text-xs uppercase tracking-[0.4em] text-[#6d6258]">Cube Portal</p>
+                    <h1 class="mt-3 text-4xl font-semibold leading-tight text-[#0f0f0f]">Connexion</h1>
+                    <p class="mt-3 text-sm text-[#6d6258]">Accedez a votre espace securise et gerez les projets Cube.</p>
+                </div>
+                <?php if (!empty($error)): ?>
+                    <div class="mb-6 rounded-2xl border border-[#f2b1b1] bg-[#ffe5e5] px-4 py-3 text-sm">
+                        <?= e($error) ?>
+                    </div>
+                <?php endif; ?>
+                <form method="post" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                    <label class="block text-sm font-medium text-[#2b2723]">
+                        Email
+                        <input type="email" name="email" required autocomplete="email"
+                               class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+                    </label>
+                    <label class="block text-sm font-medium text-[#2b2723]">
+                        Mot de passe
+                        <input type="password" name="password" required autocomplete="current-password"
+                               class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+                    </label>
+                    <button class="w-full rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="submit">
+                        Se connecter
+                    </button>
+                </form>
+                <div class="mt-6 text-sm text-[#6d6258]">
+                    <a class="font-medium text-[#1f2d3a]" href="/">Retour a l'accueil</a>
+                </div>
+            </div>
         </div>
-        <?php if (!empty($error)): ?>
-            <div class="alert alert--error"><?= e($error) ?></div>
-        <?php endif; ?>
-        <form method="post" class="form">
-            <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
-            <label class="field">
-                <span>Email</span>
-                <input type="email" name="email" required autocomplete="email">
-            </label>
-            <label class="field">
-                <span>Mot de passe</span>
-                <input type="password" name="password" required autocomplete="current-password">
-            </label>
-            <button class="btn btn--primary" type="submit">Se connecter</button>
-        </form>
-        <div class="auth__footer">
-            <a href="/">Retour a l'accueil</a>
+        <div class="relative hidden lg:block">
+            <img src="/assets/img/login-visual.svg" alt="Cube Portal visual" class="h-full w-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-tr from-[#0f0f0f]/60 via-transparent to-transparent"></div>
+            <div class="absolute bottom-10 left-10 max-w-sm text-white">
+                <p class="text-xs uppercase tracking-[0.3em] text-white/70">SaaS interne CESI</p>
+                <h2 class="mt-3 text-3xl font-semibold">Centralisez les infos des projets Cube.</h2>
+            </div>
         </div>
     </div>
 </div>
