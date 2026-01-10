@@ -5,7 +5,7 @@
 $host = 'mysql-pamal-studio.alwaysdata.net';
 $dbname = 'pamal-studio_cube_portal';
 $username = '392241';
-$password = 'pa19mal09Studio2024';
+$password = 'pa19mal09Studio2024!';
 $charset = 'utf8mb4';
 
 try {
