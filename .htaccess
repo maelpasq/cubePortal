@@ -1,4 +1,5 @@
 RewriteEngine On
+RewriteBase /
 
 # Laisser passer les ressources existantes
 RewriteCond %{REQUEST_FILENAME} -f [OR]
