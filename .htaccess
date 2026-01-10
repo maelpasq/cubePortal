@@ -1,10 +1,16 @@
-RewriteEngine On
-RewriteBase /
+# Hide .php extensions and route simple paths to their .php counterparts
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  # If request matches an existing file or directory, serve it
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^([A-Za-z0-9_\-/]+)/?$ $1.php [L,QSA]
+</IfModule>
 
-# Laisser passer les ressources existantes
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
+# Deny direct access to the config file
+<Files ".env.php">
+  Require all denied
+</Files>
 
-# Réécriture vers le front controller
-RewriteRule ^ index.php [QSA,L]
+# Deny access to the config directory via redirect-match as fallback
+RedirectMatch 403 ^/config/.*$
