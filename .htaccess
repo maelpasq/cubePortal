@@ -1,0 +1,21 @@
+Options -Indexes
+RewriteEngine On
+
+# Block access to hidden files (like .config.php) and SQL dumps
+<FilesMatch "^\.">
+  Require all denied
+</FilesMatch>
+<FilesMatch "\.(sql|ini|env)$">
+  Require all denied
+</FilesMatch>
+
+# Block direct access to internal directories
+RewriteRule ^(pages|templates|lib)/ - [F,L]
+
+# Allow direct access to existing files/folders
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Front controller for clean URLs
+RewriteRule ^ index.php [L]
