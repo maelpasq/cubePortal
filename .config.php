@@ -1,6 +1,7 @@
 <?php
 // Hidden config file for DB credentials.
 return [
+    'debug' => true,
     'db' => [
         'dsn' => 'mysql:host=mysql-pamal-studio.alwaysdata.net;port=3306;dbname=pamal-studio_cube_portal;charset=utf8mb4',
         'user' => '392241',

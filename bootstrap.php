@@ -28,6 +28,7 @@ if (!file_exists($configPath)) {
 }
 
 $config = require $configPath;
+$debug = !empty($config['debug']);
 try {
     $pdo = new PDO(
         $config['db']['dsn'],
@@ -37,6 +38,10 @@ try {
     );
 } catch (Throwable $e) {
     http_response_code(500);
-    echo 'Database connection failed.';
+    if ($debug) {
+        echo 'Database connection failed: ' . $e->getMessage();
+    } else {
+        echo 'Database connection failed.';
+    }
     exit;
 }
