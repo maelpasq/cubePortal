@@ -15,6 +15,6 @@ try {
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     // Show error only if necessary or log it. 
-    // die("Connection failed: " . $e->getMessage());
-    die("Erreur de connexion base de données.");
+    die("Connection failed: " . $e->getMessage());
+    // die("Erreur de connexion base de données.");
 }
