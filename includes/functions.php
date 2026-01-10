@@ -2,7 +2,7 @@
 session_start();
 
 // Include DB config relative to this file
-require_once __DIR__ . '/../config/db.php';
+require_once __DIR__ . '/../config/.env.php';
 
 function login($email, $password) {
     global $pdo;
