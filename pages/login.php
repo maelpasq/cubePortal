@@ -2,6 +2,7 @@
 $title = 'Cube Portal - Connexion';
 $bodyClass = '';
 $useTailwind = true;
+$loginImage = '/assets/img/login-visual.png';
 
 if (current_user($pdo)) {
     header('Location: /dashboard');
@@ -40,8 +41,8 @@ if (is_post()) {
 
 require __DIR__ . '/../templates/head.php';
 ?>
-<div class="min-h-screen bg-[#f6f1eb] text-[#0f0f0f]">
-    <div class="mx-auto grid min-h-screen max-w-6xl grid-cols-1 lg:grid-cols-2">
+<div class="min-h-screen w-full bg-[#f6f1eb] text-[#0f0f0f]">
+    <div class="grid min-h-screen w-full grid-cols-1 lg:grid-cols-2">
         <div class="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
             <div class="max-w-md">
                 <div class="mb-8">
@@ -76,7 +77,7 @@ require __DIR__ . '/../templates/head.php';
             </div>
         </div>
         <div class="relative hidden lg:block">
-            <img src="/assets/img/login-visual.svg" alt="Cube Portal visual" class="h-full w-full object-cover">
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('<?= e($loginImage) ?>');"></div>
             <div class="absolute inset-0 bg-gradient-to-tr from-[#0f0f0f]/60 via-transparent to-transparent"></div>
             <div class="absolute bottom-10 left-10 max-w-sm text-white">
                 <p class="text-xs uppercase tracking-[0.3em] text-white/70">SaaS interne CESI</p>

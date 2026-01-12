@@ -6,8 +6,8 @@ $useTailwind = true;
 $active = 'dashboard';
 require __DIR__ . '/../templates/head.php';
 ?>
-<div class="min-h-screen bg-[#f6f1eb]">
-    <div class="mx-auto grid min-h-screen w-full max-w-7xl grid-cols-1 lg:grid-cols-[260px_1fr]">
+<div class="min-h-screen w-full bg-[#f6f1eb]">
+    <div class="grid min-h-screen w-full grid-cols-1 lg:grid-cols-[260px_1fr]">
         <?php require __DIR__ . '/../templates/sidebar.php'; ?>
         <main class="px-6 py-10 lg:px-10">
             <header class="flex flex-col gap-3">
