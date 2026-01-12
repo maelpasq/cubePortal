@@ -18,5 +18,22 @@ jobs:
           script: |
             set -e
             cd /var/www/html
+
             git fetch --all
             git reset --hard origin/main
+
+            # Ecrit la config locale (non versionnée)
+            cat > /var/www/html/config.local.php <<'PHP'
+            <?php
+            return [
+              'db' => [
+                'dsn'  => 'mysql:host=${{ secrets.DB_HOST }};port=${{ secrets.DB_PORT }};dbname=${{ secrets.DB_NAME }};charset=utf8mb4',
+                'user' => '${{ secrets.DB_USER }}',
+                'pass' => '${{ secrets.DB_PASS }}',
+              ],
+            ];
+            PHP
+
+            # Permissions minimales
+            chown www-data:www-data /var/www/html/config.local.php
+            chmod 640 /var/www/html/config.local.php
