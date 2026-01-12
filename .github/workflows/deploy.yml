@@ -22,7 +22,6 @@ jobs:
             git fetch --all
             git reset --hard origin/main
 
-            # Ecrit la config locale (non versionnée)
             cat > /var/www/html/config.local.php <<'PHP'
             <?php
             return [
@@ -34,6 +33,5 @@ jobs:
             ];
             PHP
 
-            # Permissions minimales
-            chown www-data:www-data /var/www/html/config.local.php
-            chmod 640 /var/www/html/config.local.php
+            sudo chown www-data:www-data /var/www/html/config.local.php
+            sudo chmod 640 /var/www/html/config.local.php
