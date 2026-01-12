@@ -17,6 +17,14 @@ $routes = [
 ];
 
 if (!array_key_exists($path, $routes)) {
+    if (preg_match('#^/integrations/([a-z0-9-]+)$#', $path, $matches)) {
+        $integrationFile = __DIR__ . '/pages/integrations/' . $matches[1] . '.php';
+        if (is_file($integrationFile)) {
+            require $integrationFile;
+            exit;
+        }
+    }
+
     http_response_code(404);
     echo 'Page not found.';
     exit;

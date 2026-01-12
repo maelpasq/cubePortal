@@ -1,5 +1,6 @@
 <?php
 $active = $active ?? '';
+$integrations = $integrations ?? [];
 ?>
 <aside class="flex h-full flex-col gap-8 border-r border-[#e3d7cc] bg-white px-6 py-8">
     <div>
@@ -8,7 +9,21 @@ $active = $active ?? '';
     </div>
     <nav class="flex flex-col gap-2 text-sm font-medium text-[#2b2723]">
         <a class="rounded-2xl px-4 py-3 <?= $active === 'dashboard' ? 'bg-[#efe7df] text-[#0f0f0f]' : 'hover:bg-[#f6f1eb]' ?>" href="/dashboard">Tableau de bord</a>
+        <?php if (!empty($integrations)): ?>
+            <div class="mt-4 text-xs uppercase tracking-[0.3em] text-[#a09082]">Integrations</div>
+            <?php foreach ($integrations as $integration): ?>
+                <?php
+                $slug = $integration['slug'] ?? '';
+                $label = $integration['label'] ?? '';
+                $isActive = $slug !== '' && $active === 'integration:' . $slug;
+                ?>
+                <a class="rounded-2xl px-4 py-3 <?= $isActive ? 'bg-[#efe7df] text-[#0f0f0f]' : 'hover:bg-[#f6f1eb]' ?>" href="/integrations/<?= e($slug) ?>">
+                    <?= e($label) ?>
+                </a>
+            <?php endforeach; ?>
+        <?php endif; ?>
         <?php if (!empty($user) && $user['role'] === 'admin'): ?>
+            <div class="mt-4 text-xs uppercase tracking-[0.3em] text-[#a09082]">Administration</div>
             <a class="rounded-2xl px-4 py-3 <?= $active === 'admin' ? 'bg-[#efe7df] text-[#0f0f0f]' : 'hover:bg-[#f6f1eb]' ?>" href="/admin">Espace admin</a>
         <?php endif; ?>
         <a class="rounded-2xl px-4 py-3 hover:bg-[#f6f1eb]" href="/logout">Se deconnecter</a>
