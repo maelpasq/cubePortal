@@ -82,13 +82,6 @@ $user = current_user($pdo);
     </div>
 </section>
 
-<section id="about" class="bg-[#efe7df]">
-    <div class="mx-auto w-full max-w-6xl px-6 py-14">
-        <h2 class="text-3xl font-semibold text-[#0f0f0f]">A propos</h2>
-        <p class="mt-4 text-sm text-[#6d6258]">Cube Portal est un SaaS interne concu pour rendre les informations du projet Cube accessibles, structurees et actionnables par les equipes CESI.</p>
-    </div>
-</section>
-
 <footer class="bg-[#0f0f0f] text-white">
     <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-8 text-sm text-white/70">
         <span>Cube Portal (c) <?= date('Y') ?></span>
