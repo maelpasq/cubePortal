@@ -3,9 +3,9 @@
 return [
     'debug' => false,
     'db' => [
-        'dsn' => 'mysql:host=mysql-pamal-studio.alwaysdata.net;port=3306;dbname=pamal-studio_cube_portal;charset=utf8mb4',
-        'user' => '392241',
-        'pass' => 'pa19mal09Studio2024!',
+        'dsn' => 'mysql:host=nom_de_l_host;port=port;dbname=nom_de_la_db;charset=utf8mb4',
+        'user' => 'identifiant',
+        'pass' => 'mot-de-passe',
         'options' => [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
