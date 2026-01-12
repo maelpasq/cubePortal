@@ -22,7 +22,7 @@ jobs:
             git fetch --all
             git reset --hard origin/main
 
-            cat > /var/www/html/config.local.php <<'PHP'
+            sudo tee /var/www/html/config.local.php > /dev/null <<'PHP'
             <?php
             return [
               'db' => [
