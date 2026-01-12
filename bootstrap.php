@@ -20,14 +20,12 @@ require_once __DIR__ . '/lib/csrf.php';
 require_once __DIR__ . '/lib/auth.php';
 require_once __DIR__ . '/lib/helpers.php';
 
-$configPath = __DIR__ . '/.config.php';
-if (!file_exists($configPath)) {
-    http_response_code(500);
-    echo 'Config missing. Create .config.php first.';
-    exit;
-}
+$config = require __DIR__ . '/config.php';
 
-$config = require $configPath;
+$localPath = __DIR__ . '/config.local.php';
+if (file_exists($localPath)) {
+    $config = array_replace_recursive($config, require $localPath);
+}
 $debug = !empty($config['debug']);
 try {
     $pdo = new PDO(
