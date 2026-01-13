@@ -11,10 +11,10 @@ $routes = [
     '/' => __DIR__ . '/pages/landing.php',
     '/connexion' => __DIR__ . '/pages/login.php',
     '/login' => __DIR__ . '/pages/login.php',
-    '/dashboard' => __DIR__ . '/pages/dashboard.php',
-    '/documents' => __DIR__ . '/pages/documents.php',
-    '/documents/download' => __DIR__ . '/pages/documents-download.php',
-    '/admin' => __DIR__ . '/pages/admin.php',
+    '/dashboard' => __DIR__ . '/pages/dashboard/index.php',
+    '/documents' => __DIR__ . '/pages/documents/index.php',
+    '/documents/download' => __DIR__ . '/pages/documents/download.php',
+    '/admin' => __DIR__ . '/pages/admin/index.php',
     '/logout' => __DIR__ . '/pages/logout.php',
 ];
 

@@ -4,7 +4,7 @@ $title = 'Cube Portal - Dashboard';
 $bodyClass = '';
 $useTailwind = true;
 $active = 'dashboard';
-$integrations = require __DIR__ . '/../lib/integrations.php';
+$integrations = require __DIR__ . '/../../lib/integrations.php';
 $pageEyebrow = 'Bienvenue';
 $pageTitle = 'Tableau de bord';
 $pageLead = 'Bonjour ' . ($user['name'] ?: $user['email']) . '. Voici l\'etat des projets Cube.';
@@ -35,4 +35,4 @@ ob_start();
 </section>
 <?php
 $content = ob_get_clean();
-require __DIR__ . '/../templates/app-shell.php';
+require __DIR__ . '/../../templates/app-shell.php';

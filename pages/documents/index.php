@@ -4,8 +4,8 @@ $title = 'Cube Portal - Documents';
 $bodyClass = '';
 $useTailwind = true;
 $active = 'documents';
-$integrations = require __DIR__ . '/../lib/integrations.php';
-require __DIR__ . '/../templates/modal.php';
+$integrations = require __DIR__ . '/../../lib/integrations.php';
+require __DIR__ . '/../../templates/modal.php';
 $pageEyebrow = 'Documents';
 $pageTitle = 'Gestion des documents';
 $pageLead = 'Deposez vos fichiers puis consultez ou telechargez-les.';
@@ -590,4 +590,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <?php
 $content = ob_get_clean();
-require __DIR__ . '/../templates/app-shell.php';
+require __DIR__ . '/../../templates/app-shell.php';

@@ -4,8 +4,8 @@ $title = 'Cube Portal - Espace admin';
 $bodyClass = '';
 $useTailwind = true;
 $active = 'admin';
-$integrations = require __DIR__ . '/../lib/integrations.php';
-require __DIR__ . '/../templates/modal.php';
+$integrations = require __DIR__ . '/../../lib/integrations.php';
+require __DIR__ . '/../../templates/modal.php';
 
 $errors = [];
 $successes = [];
@@ -177,7 +177,7 @@ ob_start();
                         <td class="py-3">
                             <div class="flex flex-wrap gap-2">
                                 <button
-                                    class="flex items-center gap-2 rounded-full border border-[#e3d7cc] px-3 py-2 text-xs font-semibold text-[#1f2d3a]"
+                                    class="rounded-full border border-[#e3d7cc] p-2 text-xs font-semibold text-[#1f2d3a]"
                                     type="button"
                                     data-edit="true"
                                     data-id="<?= e((string)$row['id']) ?>"
@@ -185,12 +185,13 @@ ob_start();
                                     data-email="<?= e($row['email'] ?? '') ?>"
                                     data-role="<?= e($row['role'] ?? 'user') ?>"
                                     data-active="<?= $isActive ? '1' : '0' ?>"
+                                    aria-label="Modifier"
                                 >
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                         <path d="M13.5 6.5l4 4" />
                                         <path d="M4 20l3.5-.5L17 10l-3-3L4.5 16.5 4 20z" />
                                     </svg>
-                                    Modifier
+                                    <span class="sr-only">Modifier</span>
                                 </button>
                                 <form method="post">
                                     <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
@@ -423,4 +424,4 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <?php
 $content = ob_get_clean();
-require __DIR__ . '/../templates/app-shell.php';
+require __DIR__ . '/../../templates/app-shell.php';
