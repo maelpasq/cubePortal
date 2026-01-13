@@ -139,44 +139,16 @@ ob_start();
 <?php endif; ?>
 
 <section class="mt-8 rounded-3xl border border-[#e3d7cc] bg-white p-6">
-    <h2 class="text-xl font-semibold text-[#0f0f0f]">Creer un compte</h2>
-    <form method="post" class="mt-6 grid gap-4 md:grid-cols-2">
-        <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
-        <input type="hidden" name="action" value="create">
-        <label class="block text-sm font-medium text-[#2b2723]">
-            Nom
-            <input type="text" name="name" placeholder="Nom complet"
-                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-        </label>
-        <label class="block text-sm font-medium text-[#2b2723]">
-            Email
-            <input type="email" name="email" required
-                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-        </label>
-        <label class="block text-sm font-medium text-[#2b2723]">
-            Mot de passe
-            <input type="password" name="password" required
-                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-        </label>
-        <label class="block text-sm font-medium text-[#2b2723]">
-            Role
-            <select name="role" class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-                <option value="user">Utilisateur</option>
-                <option value="admin">Admin</option>
-            </select>
-        </label>
-        <label class="flex items-center gap-2 text-sm font-medium text-[#2b2723]">
-            <input type="checkbox" name="is_active" checked class="h-4 w-4 rounded border-[#e3d7cc]">
-            Compte actif
-        </label>
-        <div class="md:col-span-2">
-            <button class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="submit">Creer</button>
-        </div>
-    </form>
-</section>
-
-<section class="mt-8 rounded-3xl border border-[#e3d7cc] bg-white p-6">
-    <h2 class="text-xl font-semibold text-[#0f0f0f]">Comptes existants</h2>
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-xl font-semibold text-[#0f0f0f]">Comptes existants</h2>
+        <button
+            type="button"
+            id="open-create"
+            class="rounded-full bg-[#1f2d3a] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30"
+        >
+            Creer un compte
+        </button>
+    </div>
     <div class="mt-6 overflow-x-auto">
         <table class="w-full text-left text-sm">
             <thead class="text-xs uppercase text-[#6d6258]">
@@ -285,6 +257,48 @@ render_modal(
 );
 
 render_modal(
+    'create-modal',
+    'Creer un compte',
+    'Creation',
+    '
+    <form method="post" class="mt-3 grid gap-4" id="create-form">
+        <input type="hidden" name="csrf_token" value="' . e(csrf_token()) . '">
+        <input type="hidden" name="action" value="create">
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Nom
+            <input type="text" name="name"
+                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+        </label>
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Email
+            <input type="email" name="email" required
+                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+        </label>
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Mot de passe
+            <input type="password" name="password" required
+                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+        </label>
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Role
+            <select name="role" class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+                <option value="user">Utilisateur</option>
+                <option value="admin">Admin</option>
+            </select>
+        </label>
+        <label class="flex items-center gap-2 text-sm font-medium text-[#2b2723]">
+            <input type="checkbox" name="is_active" checked class="h-4 w-4 rounded border-[#e3d7cc]">
+            Compte actif
+        </label>
+        <div class="flex flex-wrap gap-3">
+            <button class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="submit">Creer</button>
+            <button type="button" id="create-cancel" class="rounded-full border border-[#e3d7cc] px-6 py-3 text-sm font-semibold text-[#1f2d3a]">Annuler</button>
+        </div>
+    </form>
+    '
+);
+
+render_modal(
     'delete-user-modal',
     'Supprimer ce compte ?',
     'Confirmation',
@@ -305,11 +319,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const roleSelect = document.getElementById('edit-role');
     const activeCheckbox = document.getElementById('edit-active');
     const passwordInput = document.getElementById('edit-password');
+    const createModal = document.getElementById('create-modal');
+    const createCancel = document.getElementById('create-cancel');
+    const openCreate = document.getElementById('open-create');
+    const createForm = document.getElementById('create-form');
     const deleteModal = document.getElementById('delete-user-modal');
     const deleteName = document.getElementById('delete-user-name');
     const deleteConfirm = document.getElementById('delete-user-confirm');
     const deleteCancel = document.getElementById('delete-user-cancel');
-    if (!modal || !cancelBtn || !userIdField || !nameInput || !emailInput || !roleSelect || !activeCheckbox || !passwordInput || !deleteModal || !deleteName || !deleteConfirm || !deleteCancel) return;
+    if (!modal || !cancelBtn || !userIdField || !nameInput || !emailInput || !roleSelect || !activeCheckbox || !passwordInput || !deleteModal || !deleteName || !deleteConfirm || !deleteCancel || !createModal || !createCancel || !openCreate || !createForm) return;
 
     const closeModal = () => {
         modal.classList.add('hidden');
@@ -336,6 +354,26 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             closeModal();
+        }
+    });
+
+    const closeCreateModal = () => {
+        createModal.classList.add('hidden');
+        createForm.reset();
+    };
+
+    openCreate.addEventListener('click', () => {
+        createModal.classList.remove('hidden');
+    });
+
+    createCancel.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeCreateModal();
+    });
+
+    createModal.addEventListener('click', (e) => {
+        if (e.target === createModal) {
+            closeCreateModal();
         }
     });
 
