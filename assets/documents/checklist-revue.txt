@@ -1,0 +1,5 @@
+Checklist de revue
+
+- Verifier les livrables en attente
+- Mettre a jour les contacts
+- Confirmer les dates de prochaine revue

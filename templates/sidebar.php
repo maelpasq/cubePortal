@@ -10,7 +10,7 @@ $integrations = $integrations ?? [];
     <nav class="flex flex-col gap-2 text-sm font-medium text-[#2b2723]">
         <a class="rounded-2xl px-4 py-3 <?= $active === 'dashboard' ? 'bg-[#efe7df] text-[#0f0f0f]' : 'hover:bg-[#f6f1eb]' ?>" href="/dashboard">Tableau de bord</a>
         <?php if (!empty($integrations)): ?>
-            <div class="mt-4 text-xs uppercase tracking-[0.3em] text-[#a09082]">Integrations</div>
+            <div class="mt-4 text-xs uppercase tracking-[0.3em] text-[#a09082]">Exemple</div>
             <?php foreach ($integrations as $integration): ?>
                 <?php
                 $slug = $integration['slug'] ?? '';
@@ -22,6 +22,8 @@ $integrations = $integrations ?? [];
                 </a>
             <?php endforeach; ?>
         <?php endif; ?>
+        <div class="mt-4 text-xs uppercase tracking-[0.3em] text-[#a09082]">Documents</div>
+        <a class="rounded-2xl px-4 py-3 <?= $active === 'documents' ? 'bg-[#efe7df] text-[#0f0f0f]' : 'hover:bg-[#f6f1eb]' ?>" href="/documents">Gestion des documents</a>
         <?php if (!empty($user) && $user['role'] === 'admin'): ?>
             <div class="mt-4 text-xs uppercase tracking-[0.3em] text-[#a09082]">Administration</div>
             <a class="rounded-2xl px-4 py-3 <?= $active === 'admin' ? 'bg-[#efe7df] text-[#0f0f0f]' : 'hover:bg-[#f6f1eb]' ?>" href="/admin">Espace admin</a>

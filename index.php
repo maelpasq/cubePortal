@@ -12,6 +12,7 @@ $routes = [
     '/connexion' => __DIR__ . '/pages/login.php',
     '/login' => __DIR__ . '/pages/login.php',
     '/dashboard' => __DIR__ . '/pages/dashboard.php',
+    '/documents' => __DIR__ . '/pages/documents.php',
     '/admin' => __DIR__ . '/pages/admin.php',
     '/logout' => __DIR__ . '/pages/logout.php',
 ];
