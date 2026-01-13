@@ -138,6 +138,23 @@ if ($tableReady && is_post()) {
             }
         }
     }
+} elseif ($tableReady && ($_POST['action'] ?? '') === 'bulk_delete') {
+    if (!csrf_verify($_POST['csrf_token'] ?? null)) {
+        $deleteErrors[] = 'Jeton de securite invalide.';
+    } else {
+        $ids = array_filter(array_map('intval', $_POST['selected_ids'] ?? []));
+        if (empty($ids)) {
+            $deleteErrors[] = 'Aucun document selectionne.';
+        } else {
+            $in = implode(',', array_fill(0, count($ids), '?'));
+            $stmt = $pdo->prepare("DELETE FROM documents WHERE id IN ($in)");
+            if ($stmt->execute($ids)) {
+                $deleteSuccess[] = 'Documents supprimes.';
+            } else {
+                $deleteErrors[] = 'Erreur lors de la suppression multiple.';
+            }
+        }
+    }
 }
 
 $documents = [];
@@ -208,11 +225,21 @@ ob_start();
         </form>
 
         <div class="mt-8 border-t border-[#efe7df] pt-6">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <p class="text-sm font-semibold text-[#0f0f0f]">Documents disponibles</p>
                     <p class="mt-2 text-sm text-[#6d6258]"><?= count($documents) ?> fichier(s) disponible(s)</p>
                 </div>
+                <?php if (!empty($documents)): ?>
+                    <div class="flex items-center gap-2">
+                        <button id="toggle-select" type="button" class="rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]">Selectionner</button>
+                        <form id="bulk-delete-form" method="post" class="hidden">
+                            <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                            <input type="hidden" name="action" value="bulk_delete">
+                            <button id="bulk-delete-btn" class="rounded-full bg-[#b3261e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#921c17]" type="submit" disabled>Supprimer la selection</button>
+                        </form>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <?php if (!$tableReady && $tableError !== ''): ?>
@@ -224,33 +251,38 @@ ob_start();
                     Aucun fichier pour le moment. Deposez vos documents pour les retrouver ici.
                 </div>
             <?php else: ?>
-                <ul class="mt-6 divide-y divide-[#efe7df]">
-                    <?php foreach ($documents as $document): ?>
-                        <li class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                            <div class="flex items-center gap-3">
-                                <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f6f1eb] text-xs font-semibold text-[#1f2d3a]">
-                                    <?= e(strtoupper(pathinfo($document['filename'] ?? 'FILE', PATHINFO_EXTENSION) ?: 'FILE')) ?>
+                <form id="documents-list-form" method="post">
+                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                    <input type="hidden" name="action" value="bulk_delete">
+                    <ul class="mt-6 divide-y divide-[#efe7df]">
+                        <?php foreach ($documents as $document): ?>
+                            <li class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                                <div class="flex items-center gap-3">
+                                    <input type="checkbox" name="selected_ids[]" value="<?= e((string)$document['id']) ?>" class="selection-checkbox hidden h-4 w-4 rounded border-[#e3d7cc] text-[#1f2d3a] focus:ring-0">
+                                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f6f1eb] text-xs font-semibold text-[#1f2d3a]">
+                                        <?= e(strtoupper(pathinfo($document['filename'] ?? 'FILE', PATHINFO_EXTENSION) ?: 'FILE')) ?>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-semibold text-[#0f0f0f]"><?= e($document['filename'] ?? 'Document') ?></p>
+                                        <p class="text-xs text-[#6d6258]"><?= e(format_bytes((int)($document['size_bytes'] ?? 0))) ?> - <?= e(date('d/m/Y H:i', strtotime($document['created_at'] ?? 'now'))) ?></p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-sm font-semibold text-[#0f0f0f]"><?= e($document['filename'] ?? 'Document') ?></p>
-                                    <p class="text-xs text-[#6d6258]"><?= e(format_bytes((int)($document['size_bytes'] ?? 0))) ?> • <?= e(date('d/m/Y H:i', strtotime($document['created_at'] ?? 'now'))) ?></p>
+                                <div class="flex flex-wrap items-center gap-2 text-sm">
+                                    <a class="rounded-full border border-[#e3d7cc] px-3 py-2 text-[#1f2d3a]" href="/documents/download?id=<?= e((string)$document['id']) ?>" target="_blank" rel="noreferrer">Ouvrir</a>
+                                    <a class="rounded-full bg-[#1f2d3a] px-3 py-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1">Telecharger</a>
+                                    <form method="post" class="inline">
+                                        <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                                        <input type="hidden" name="action" value="delete">
+                                        <input type="hidden" name="document_id" value="<?= e((string)$document['id']) ?>">
+                                        <button class="rounded-full bg-[#b3261e] px-3 py-2 font-semibold text-white hover:bg-[#921c17]" type="submit" data-delete="true" data-doc-name="<?= e($document['filename'] ?? 'Document') ?>">
+                                            Supprimer
+                                        </button>
+                                    </form>
                                 </div>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-2 text-sm">
-                                <a class="rounded-full border border-[#e3d7cc] px-3 py-2 text-[#1f2d3a]" href="/documents/download?id=<?= e((string)$document['id']) ?>" target="_blank" rel="noreferrer">Ouvrir</a>
-                                <a class="rounded-full bg-[#1f2d3a] px-3 py-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1">Telecharger</a>
-                                <form method="post" class="inline">
-                                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
-                                    <input type="hidden" name="action" value="delete">
-                                    <input type="hidden" name="document_id" value="<?= e((string)$document['id']) ?>">
-                                    <button class="rounded-full bg-[#b3261e] px-3 py-2 font-semibold text-white hover:bg-[#921c17]" type="submit" data-delete="true" data-doc-name="<?= e($document['filename'] ?? 'Document') ?>">
-                                        Supprimer
-                                    </button>
-                                </form>
-                            </div>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </form>
             <?php endif; ?>
         </div>
     </article>
@@ -266,6 +298,19 @@ render_modal(
         <button id="cancel-delete" class="rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]" type="button">Annuler</button>
     </div>'
 );
+
+render_modal(
+    'limit-modal',
+    'Trop de fichiers',
+    'Selection',
+    '<p class="text-sm text-[#6d6258]">Choisissez jusqu\'a 5 fichiers a conserver.</p>
+    <div id="limit-error" class="mt-2 text-sm text-[#b3261e] hidden"></div>
+    <div id="limit-files-list" class="mt-3 max-h-64 space-y-2 overflow-auto"></div>',
+    '<div class="flex flex-wrap items-center gap-3">
+        <button id="limit-confirm" class="rounded-full bg-[#1f2d3a] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="button">Valider</button>
+        <button id="limit-cancel" class="rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]" type="button">Annuler</button>
+    </div>'
+);
 ?>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -277,12 +322,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const deleteModalName = document.getElementById('delete-modal-name');
     const confirmDeleteBtn = document.getElementById('confirm-delete');
     const cancelDeleteBtn = document.getElementById('cancel-delete');
-    if (!input || !dropArea || !pendingList || !importButton || !deleteModal || !deleteModalName || !confirmDeleteBtn || !cancelDeleteBtn) return;
+    const limitModal = document.getElementById('limit-modal');
+    const limitList = document.getElementById('limit-files-list');
+    const limitError = document.getElementById('limit-error');
+    const limitConfirm = document.getElementById('limit-confirm');
+    const limitCancel = document.getElementById('limit-cancel');
+    const toggleSelectBtn = document.getElementById('toggle-select');
+    const bulkForm = document.getElementById('documents-list-form');
+    const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
+    if (!input || !dropArea || !pendingList || !importButton || !deleteModal || !deleteModalName || !confirmDeleteBtn || !cancelDeleteBtn || !limitModal || !limitList || !limitError || !limitConfirm || !limitCancel) return;
 
     const MAX_FILES = 5;
     let formToDelete = null;
-
     let dataTransfer = new DataTransfer();
+    let overLimitFiles = [];
+    let selectionMode = false;
 
     const refreshList = () => {
         const files = dataTransfer.files;
@@ -311,22 +365,54 @@ document.addEventListener('DOMContentLoaded', () => {
         importButton.classList.remove('hidden');
     };
 
-    const setFiles = (fileList) => {
-        const limited = fileList.slice(0, MAX_FILES);
+    const setFiles = (filesArr) => {
         dataTransfer = new DataTransfer();
-        for (let i = 0; i < limited.length; i++) {
-            dataTransfer.items.add(limited[i]);
-        }
+        filesArr.slice(0, MAX_FILES).forEach((f) => dataTransfer.items.add(f));
         input.files = dataTransfer.files;
         refreshList();
+    };
+
+    const buildLimitList = (filesArr) => {
+        const items = filesArr.map((f, idx) => {
+            const size = (f.size / 1024 / 1024) >= 1 ? (f.size / 1024 / 1024).toFixed(1) + ' Mo' : (f.size / 1024).toFixed(0) + ' Ko';
+            const checked = idx < MAX_FILES ? 'checked' : '';
+            return `<label class="flex items-center gap-3 rounded-2xl border border-[#e3d7cc] px-3 py-2">
+                <input type="checkbox" class="limit-checkbox h-4 w-4 rounded border-[#e3d7cc] text-[#1f2d3a] focus:ring-0" data-index="${idx}" ${checked}>
+                <div class="flex flex-col">
+                    <span class="text-sm font-semibold text-[#0f0f0f]">${f.name}</span>
+                    <span class="text-xs text-[#6d6258]">${size}</span>
+                </div>
+            </label>`;
+        });
+        limitList.innerHTML = items.join('');
+    };
+
+    const openLimitModal = (filesArr) => {
+        overLimitFiles = filesArr;
+        buildLimitList(filesArr);
+        limitError.classList.add('hidden');
+        limitModal.classList.remove('hidden');
+    };
+
+    const closeLimitModal = () => {
+        overLimitFiles = [];
+        limitModal.classList.add('hidden');
+    };
+
+    const handleNewFiles = (newFiles) => {
+        const merged = Array.from(dataTransfer.files);
+        merged.push(...Array.from(newFiles));
+        if (merged.length > MAX_FILES) {
+            openLimitModal(merged);
+        } else {
+            setFiles(merged);
+        }
     };
 
     input.addEventListener('change', (e) => {
         const files = e.target.files;
         if (!files) return;
-        const merged = Array.from(dataTransfer.files);
-        merged.push(...Array.from(files));
-        setFiles(merged);
+        handleNewFiles(files);
     });
 
     pendingList.addEventListener('click', (e) => {
@@ -356,12 +442,38 @@ document.addEventListener('DOMContentLoaded', () => {
     dropArea.addEventListener('drop', (e) => {
         const files = e.dataTransfer?.files;
         if (!files || files.length === 0) return;
-        const merged = Array.from(dataTransfer.files);
-        merged.push(...Array.from(files));
-        setFiles(merged);
+        handleNewFiles(files);
     });
 
-    // Gestion modale suppression
+    // Limit modal logic
+    limitCancel.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeLimitModal();
+    });
+
+    limitModal.addEventListener('click', (e) => {
+        if (e.target === limitModal) {
+            closeLimitModal();
+        }
+    });
+
+    limitConfirm.addEventListener('click', (e) => {
+        e.preventDefault();
+        const checkboxes = Array.from(limitList.querySelectorAll('.limit-checkbox'));
+        const selectedIndexes = checkboxes
+            .filter((cb) => cb.checked)
+            .map((cb) => parseInt(cb.dataset.index || '0', 10));
+        if (selectedIndexes.length === 0 || selectedIndexes.length > MAX_FILES) {
+            limitError.textContent = `Selectionnez jusqu'a ${MAX_FILES} fichiers.`;
+            limitError.classList.remove('hidden');
+            return;
+        }
+        const chosen = selectedIndexes.map((idx) => overLimitFiles[idx]).filter(Boolean);
+        setFiles(chosen);
+        closeLimitModal();
+    });
+
+    // Gestion modale suppression (unitaire)
     document.querySelectorAll('button[data-delete]').forEach((btn) => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -373,14 +485,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    const closeModal = () => {
+    const closeDeleteModal = () => {
         deleteModal.classList.add('hidden');
         formToDelete = null;
     };
 
     cancelDeleteBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        closeModal();
+        closeDeleteModal();
     });
 
     confirmDeleteBtn.addEventListener('click', (e) => {
@@ -388,14 +500,45 @@ document.addEventListener('DOMContentLoaded', () => {
         if (formToDelete) {
             formToDelete.submit();
         }
-        closeModal();
+        closeDeleteModal();
     });
 
     deleteModal.addEventListener('click', (e) => {
         if (e.target === deleteModal) {
-            closeModal();
+            closeDeleteModal();
         }
     });
+
+    // Mode selection multiple pour suppression
+    if (toggleSelectBtn && bulkForm && bulkDeleteBtn) {
+        const checkboxes = Array.from(document.querySelectorAll('.selection-checkbox'));
+        const updateBulkState = () => {
+            const anyChecked = checkboxes.some((cb) => cb.checked);
+            bulkDeleteBtn.disabled = !anyChecked;
+        };
+        toggleSelectBtn.addEventListener('click', () => {
+            selectionMode = !selectionMode;
+            if (selectionMode) {
+                toggleSelectBtn.classList.add('bg-[#1f2d3a]', 'text-white');
+                bulkForm.classList.remove('hidden');
+                checkboxes.forEach((cb) => cb.classList.remove('hidden'));
+            } else {
+                toggleSelectBtn.classList.remove('bg-[#1f2d3a]', 'text-white');
+                bulkForm.classList.add('hidden');
+                checkboxes.forEach((cb) => {
+                    cb.checked = false;
+                    cb.classList.add('hidden');
+                });
+                bulkDeleteBtn.disabled = true;
+            }
+        });
+        checkboxes.forEach((cb) => cb.addEventListener('change', updateBulkState));
+        bulkForm.addEventListener('submit', (e) => {
+            if (bulkDeleteBtn.disabled) {
+                e.preventDefault();
+            }
+        });
+    }
 });
 </script>
 <?php
