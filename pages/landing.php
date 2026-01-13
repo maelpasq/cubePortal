@@ -58,13 +58,13 @@ $user = current_user($pdo);
                 <p class="mt-2 text-sm text-white/70">Centralisez les infos critiques avant la prochaine revue.</p>
             </div>
         </div>
-
-        <footer class="bg-[#0f0f0f] text-white">
-            <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-8 text-sm text-white/70">
-                <span>Cube Portal (c) <?= date('Y') ?></span>
-                <span>Infrastructure CESI</span>
-            </div>
-        </footer>
     </main>
+
+    <footer class="bg-[#0f0f0f] text-white">
+        <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-8 text-sm text-white/70">
+            <span>Cube Portal (c) <?= date('Y') ?></span>
+            <span>Infrastructure CESI</span>
+        </div>
+    </footer>
 </div>
 <?php require __DIR__ . '/../templates/footer.php'; ?>
