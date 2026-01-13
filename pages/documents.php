@@ -138,7 +138,7 @@ if ($tableReady) {
 
 ob_start();
 ?>
-<section class="mt-8 grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+<section class="mt-8 space-y-6">
     <article class="rounded-3xl border border-[#e3d7cc] bg-white p-6">
         <div class="flex items-start justify-between gap-4">
             <div>
@@ -173,13 +173,15 @@ ob_start();
             </div>
         <?php endif; ?>
 
-        <form class="mt-6 space-y-4" method="post" enctype="multipart/form-data">
+        <form id="documents-form" class="mt-6 space-y-4" method="post" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
-            <label class="relative flex h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-[#d3c6ba] bg-[#f9f3ed] px-4 text-center text-sm text-[#6d6258] hover:border-[#1f2d3a] hover:text-[#1f2d3a]">
-                <input class="absolute inset-0 h-full w-full cursor-pointer opacity-0" type="file" name="documents[]" multiple accept="*/*">
+            <input type="hidden" name="action" value="upload">
+            <label id="drop-area" class="relative flex h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-[#d3c6ba] bg-[#f9f3ed] px-4 text-center text-sm text-[#6d6258] hover:border-[#1f2d3a] hover:text-[#1f2d3a]">
+                <input id="documents-input" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" type="file" name="documents[]" multiple accept="*/*">
                 <span class="text-sm font-semibold text-[#0f0f0f]">Glisser-deposer vos fichiers</span>
                 <span class="text-xs text-[#6d6258]">Ou cliquez pour parcourir • Tous formats</span>
             </label>
+            <div id="pending-list" class="rounded-2xl border border-[#e3d7cc] bg-[#f6f1eb] px-4 py-4 text-sm text-[#6d6258] hidden"></div>
             <button
                 class="rounded-full px-6 py-3 text-sm font-semibold text-white <?= $tableReady ? 'bg-[#1f2d3a] shadow-lg shadow-[#1f2d3a]/30' : 'bg-[#b8b0a7] cursor-not-allowed' ?>"
                 type="submit"
@@ -188,55 +190,139 @@ ob_start();
                 Importer les fichiers
             </button>
         </form>
-    </article>
 
-    <article class="rounded-3xl border border-[#e3d7cc] bg-white p-6">
-        <div class="flex items-center justify-between">
-            <div>
-                <p class="text-sm font-semibold text-[#0f0f0f]">Documents disponibles</p>
-                <p class="mt-2 text-sm text-[#6d6258]"><?= count($documents) ?> fichier(s) disponible(s)</p>
+        <div class="mt-8 border-t border-[#efe7df] pt-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-semibold text-[#0f0f0f]">Documents disponibles</p>
+                    <p class="mt-2 text-sm text-[#6d6258]"><?= count($documents) ?> fichier(s) disponible(s)</p>
+                </div>
             </div>
+
+            <?php if (!$tableReady && $tableError !== ''): ?>
+                <div class="mt-6 rounded-2xl border border-[#f2b1b1] bg-[#ffe5e5] px-4 py-3 text-sm text-[#7d2b2b]">
+                    <?= e($tableError) ?>
+                </div>
+            <?php elseif (empty($documents)): ?>
+                <div class="mt-6 rounded-2xl border border-[#e3d7cc] bg-[#f9f3ed] px-4 py-4 text-sm text-[#6d6258]">
+                    Aucun fichier pour le moment. Deposez vos documents pour les retrouver ici.
+                </div>
+            <?php else: ?>
+                <ul class="mt-6 divide-y divide-[#efe7df]">
+                    <?php foreach ($documents as $document): ?>
+                        <li class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f6f1eb] text-xs font-semibold text-[#1f2d3a]">
+                                    <?= e(strtoupper(pathinfo($document['filename'] ?? 'FILE', PATHINFO_EXTENSION) ?: 'FILE')) ?>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-[#0f0f0f]"><?= e($document['filename'] ?? 'Document') ?></p>
+                                    <p class="text-xs text-[#6d6258]"><?= e(format_bytes((int)($document['size_bytes'] ?? 0))) ?> • <?= e(date('d/m/Y H:i', strtotime($document['created_at'] ?? 'now'))) ?></p>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 text-sm">
+                                <a class="rounded-full border border-[#e3d7cc] px-3 py-2 text-[#1f2d3a]" href="/documents/download?id=<?= e((string)$document['id']) ?>" target="_blank" rel="noreferrer">Ouvrir</a>
+                                <a class="rounded-full bg-[#1f2d3a] px-3 py-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1">Telecharger</a>
+                                <form method="post" class="inline">
+                                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="document_id" value="<?= e((string)$document['id']) ?>">
+                                    <button class="rounded-full bg-[#b3261e] px-3 py-2 font-semibold text-white hover:bg-[#921c17]" type="submit" onclick="return confirm('Supprimer ce document ?');">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
         </div>
-
-        <?php if (!$tableReady && $tableError !== ''): ?>
-            <div class="mt-6 rounded-2xl border border-[#f2b1b1] bg-[#ffe5e5] px-4 py-3 text-sm text-[#7d2b2b]">
-                <?= e($tableError) ?>
-            </div>
-        <?php elseif (empty($documents)): ?>
-            <div class="mt-6 rounded-2xl border border-[#e3d7cc] bg-[#f9f3ed] px-4 py-4 text-sm text-[#6d6258]">
-                Aucun fichier pour le moment. Deposez vos documents pour les retrouver ici.
-            </div>
-        <?php else: ?>
-            <ul class="mt-6 divide-y divide-[#efe7df]">
-                <?php foreach ($documents as $document): ?>
-                    <li class="flex items-center justify-between gap-4 py-3">
-                        <div class="flex items-center gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f6f1eb] text-xs font-semibold text-[#1f2d3a]">
-                                <?= e(strtoupper(pathinfo($document['filename'] ?? 'FILE', PATHINFO_EXTENSION) ?: 'FILE')) ?>
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-[#0f0f0f]"><?= e($document['filename'] ?? 'Document') ?></p>
-                                <p class="text-xs text-[#6d6258]"><?= e(format_bytes((int)($document['size_bytes'] ?? 0))) ?> • <?= e(date('d/m/Y H:i', strtotime($document['created_at'] ?? 'now'))) ?></p>
-                            </div>
-                        </div>
-                        <div class="flex flex-shrink-0 items-center gap-2 text-sm">
-                            <a class="rounded-full border border-[#e3d7cc] px-3 py-2 text-[#1f2d3a]" href="/documents/download?id=<?= e((string)$document['id']) ?>" target="_blank" rel="noreferrer">Ouvrir</a>
-                            <a class="rounded-full bg-[#1f2d3a] px-3 py-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1">Telecharger</a>
-                            <form method="post" class="inline">
-                                <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="document_id" value="<?= e((string)$document['id']) ?>">
-                                <button class="rounded-full bg-[#b3261e] px-3 py-2 font-semibold text-white hover:bg-[#921c17]" type="submit" onclick="return confirm('Supprimer ce document ?');">
-                                    Supprimer
-                                </button>
-                            </form>
-                        </div>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-        <?php endif; ?>
     </article>
 </section>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('documents-input');
+    const dropArea = document.getElementById('drop-area');
+    const pendingList = document.getElementById('pending-list');
+    if (!input || !dropArea || !pendingList) return;
+
+    let dataTransfer = new DataTransfer();
+
+    const refreshList = () => {
+        const files = dataTransfer.files;
+        if (!files || files.length === 0) {
+            pendingList.classList.add('hidden');
+            pendingList.innerHTML = '';
+            return;
+        }
+        const items = [];
+        for (let i = 0; i < files.length; i++) {
+            const f = files[i];
+            const size = (f.size / 1024 / 1024) >= 1 ? (f.size / 1024 / 1024).toFixed(1) + ' Mo' : (f.size / 1024).toFixed(0) + ' Ko';
+            items.push(
+                `<div class="flex items-center justify-between gap-3 border-b border-[#efe7df] py-2 last:border-0">
+                    <div class="text-left">
+                        <p class="text-sm font-semibold text-[#0f0f0f]">${f.name}</p>
+                        <p class="text-xs text-[#6d6258]">${size}</p>
+                    </div>
+                    <button type="button" class="rounded-full bg-[#b3261e] px-3 py-1 text-xs font-semibold text-white hover:bg-[#921c17]" data-index="${i}">Supprimer</button>
+                </div>`
+            );
+        }
+        pendingList.innerHTML = items.join('');
+        pendingList.classList.remove('hidden');
+    };
+
+    const setFiles = (fileList) => {
+        dataTransfer = new DataTransfer();
+        for (let i = 0; i < fileList.length; i++) {
+            dataTransfer.items.add(fileList[i]);
+        }
+        input.files = dataTransfer.files;
+        refreshList();
+    };
+
+    input.addEventListener('change', (e) => {
+        const files = e.target.files;
+        if (!files) return;
+        const merged = Array.from(dataTransfer.files);
+        merged.push(...Array.from(files));
+        setFiles(merged);
+    });
+
+    pendingList.addEventListener('click', (e) => {
+        const target = e.target;
+        if (!(target instanceof HTMLElement)) return;
+        if (target.dataset.index !== undefined) {
+            const idx = parseInt(target.dataset.index, 10);
+            const remaining = Array.from(dataTransfer.files).filter((_, i) => i !== idx);
+            setFiles(remaining);
+        }
+    });
+
+    ['dragenter', 'dragover'].forEach(evt =>
+        dropArea.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropArea.classList.add('border-[#1f2d3a]', 'text-[#1f2d3a]');
+        })
+    );
+    ['dragleave', 'drop'].forEach(evt =>
+        dropArea.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropArea.classList.remove('border-[#1f2d3a]', 'text-[#1f2d3a]');
+        })
+    );
+    dropArea.addEventListener('drop', (e) => {
+        const files = e.dataTransfer?.files;
+        if (!files || files.length === 0) return;
+        const merged = Array.from(dataTransfer.files);
+        merged.push(...Array.from(files));
+        setFiles(merged);
+    });
+});
+</script>
 <?php
 $content = ob_get_clean();
 require __DIR__ . '/../templates/app-shell.php';
