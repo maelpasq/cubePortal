@@ -204,10 +204,15 @@ ob_start();
         <form id="documents-form" class="mt-6 space-y-4" method="post" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
             <input type="hidden" name="action" value="upload">
-            <label id="drop-area" class="relative flex h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-[#d3c6ba] bg-[#f9f3ed] px-4 text-center text-sm text-[#6d6258] hover:border-[#1f2d3a] hover:text-[#1f2d3a]">
+            <label id="drop-area" class="relative flex cursor-pointer items-center gap-3 rounded-full border border-dashed border-[#d3c6ba] bg-[#f9f3ed] px-6 py-4 text-sm text-[#6d6258] shadow-sm hover:border-[#1f2d3a] hover:text-[#1f2d3a]">
                 <input id="documents-input" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" type="file" name="documents[]" multiple accept="*/*">
-                <span class="text-sm font-semibold text-[#0f0f0f]">Glisser-deposer vos fichiers</span>
-                <span class="text-xs text-[#6d6258]">Ou cliquez pour parcourir - Tous formats - Max 5 fichiers - 20 Mo/fichier</span>
+                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[#1f2d3a] shadow-inner">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                </span>
+                <div class="flex flex-col text-left leading-tight">
+                    <span class="text-sm font-semibold text-[#0f0f0f]">Glisser-deposer vos fichiers</span>
+                    <span class="text-xs text-[#6d6258]">Ou cliquez - Tous formats - Max 5 fichiers - 20 Mo/fichier</span>
+                </div>
             </label>
             <div id="pending-list" class="rounded-2xl border border-[#e3d7cc] bg-[#f6f1eb] px-4 py-4 text-sm text-[#6d6258] hidden"></div>
             <button
@@ -250,41 +255,41 @@ ob_start();
                     Aucun fichier pour le moment. Deposez vos documents pour les retrouver ici.
                 </div>
             <?php else: ?>
-                <form id="documents-list-form" method="post">
+                <ul class="mt-6 divide-y divide-[#efe7df]">
+                    <?php foreach ($documents as $document): ?>
+                        <li class="document-row flex flex-col gap-3 rounded-2xl py-3 transition sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" form="documents-list-form" name="selected_ids[]" value="<?= e((string)$document['id']) ?>" class="selection-checkbox hidden h-4 w-4 rounded border-[#e3d7cc] text-[#1f2d3a] focus:ring-0">
+                                <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f6f1eb] text-xs font-semibold text-[#1f2d3a]">
+                                    <?= e(strtoupper(pathinfo($document['filename'] ?? 'FILE', PATHINFO_EXTENSION) ?: 'FILE')) ?>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold text-[#0f0f0f]"><?= e($document['filename'] ?? 'Document') ?></p>
+                                    <p class="text-xs text-[#6d6258]"><?= e(format_bytes((int)($document['size_bytes'] ?? 0))) ?> - <?= e(date('d/m/Y H:i', strtotime($document['created_at'] ?? 'now'))) ?></p>
+                                </div>
+                            </div>
+                        <div class="flex flex-wrap items-center gap-2 text-sm">
+                                <a class="rounded-full border border-[#e3d7cc] p-2 text-[#1f2d3a]" href="/documents/download?id=<?= e((string)$document['id']) ?>" target="_blank" rel="noreferrer" aria-label="Ouvrir">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                                </a>
+                                <a class="rounded-full bg-[#1f2d3a] p-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1" aria-label="Telecharger">
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 13l-7 7-7-7"/></svg>
+                                </a>
+                                <form method="post" class="inline">
+                                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="document_id" value="<?= e((string)$document['id']) ?>">
+                                    <button class="rounded-full bg-[#b3261e] p-2 font-semibold text-white hover:bg-[#921c17]" type="submit" data-delete="true" data-doc-name="<?= e($document['filename'] ?? 'Document') ?>" aria-label="Supprimer">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+                <form id="documents-list-form" method="post" class="hidden">
                     <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                     <input type="hidden" name="action" value="bulk_delete">
-                    <ul class="mt-6 divide-y divide-[#efe7df]">
-                        <?php foreach ($documents as $document): ?>
-                            <li class="document-row flex flex-col gap-3 rounded-2xl py-3 transition sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-                                <div class="flex items-center gap-3">
-                                    <input type="checkbox" name="selected_ids[]" value="<?= e((string)$document['id']) ?>" class="selection-checkbox hidden h-4 w-4 rounded border-[#e3d7cc] text-[#1f2d3a] focus:ring-0">
-                                    <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f6f1eb] text-xs font-semibold text-[#1f2d3a]">
-                                        <?= e(strtoupper(pathinfo($document['filename'] ?? 'FILE', PATHINFO_EXTENSION) ?: 'FILE')) ?>
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-[#0f0f0f]"><?= e($document['filename'] ?? 'Document') ?></p>
-                                        <p class="text-xs text-[#6d6258]"><?= e(format_bytes((int)($document['size_bytes'] ?? 0))) ?> - <?= e(date('d/m/Y H:i', strtotime($document['created_at'] ?? 'now'))) ?></p>
-                                    </div>
-                                </div>
-                            <div class="flex flex-wrap items-center gap-2 text-sm">
-                                    <a class="rounded-full border border-[#e3d7cc] p-2 text-[#1f2d3a]" href="/documents/download?id=<?= e((string)$document['id']) ?>" target="_blank" rel="noreferrer" aria-label="Ouvrir">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                                    </a>
-                                    <a class="rounded-full bg-[#1f2d3a] p-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1" aria-label="Telecharger">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 13l-7 7-7-7"/></svg>
-                                    </a>
-                                    <form method="post" class="inline">
-                                        <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
-                                        <input type="hidden" name="action" value="delete">
-                                        <input type="hidden" name="document_id" value="<?= e((string)$document['id']) ?>">
-                                        <button class="rounded-full bg-[#b3261e] p-2 font-semibold text-white hover:bg-[#921c17]" type="submit" data-delete="true" data-doc-name="<?= e($document['filename'] ?? 'Document') ?>" aria-label="Supprimer">
-                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
-                                        </button>
-                                    </form>
-                                </div>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
                 </form>
             <?php endif; ?>
         </div>
@@ -526,7 +531,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Mode selection multiple pour suppression
     if (toggleSelectBtn && documentsListForm && bulkDeleteBtn) {
-        const checkboxes = Array.from(documentsListForm.querySelectorAll('.selection-checkbox'));
+        const checkboxes = Array.from(document.querySelectorAll('.selection-checkbox'));
         const updateBulkState = () => {
             const anyChecked = checkboxes.some((cb) => cb.checked);
             bulkDeleteBtn.disabled = !anyChecked;
