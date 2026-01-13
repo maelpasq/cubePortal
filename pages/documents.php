@@ -14,6 +14,8 @@ $uploadSuccess = [];
 $uploadErrors = [];
 $deleteSuccess = [];
 $deleteErrors = [];
+$maxFiles = 5;
+$maxFileSize = 20 * 1024 * 1024; // 20 Mo
 $tableReady = true;
 $tableError = '';
 
@@ -84,18 +86,30 @@ if ($tableReady && is_post()) {
             $files = $_FILES['documents'];
             $total = is_array($files['name']) ? count($files['name']) : 0;
 
+            if ($total > $maxFiles) {
+                $uploadErrors[] = "Maximum {$maxFiles} fichiers par envoi.";
+            }
+
             for ($i = 0; $i < $total; $i++) {
+                if ($i >= $maxFiles) {
+                    break;
+                }
                 $error = $files['error'][$i] ?? UPLOAD_ERR_NO_FILE;
                 $tmpName = $files['tmp_name'][$i] ?? '';
                 $originalName = $files['name'][$i] ?? 'document';
+                $size = (int)($files['size'][$i] ?? 0);
 
                 if ($error !== UPLOAD_ERR_OK || !is_uploaded_file($tmpName)) {
                     $uploadErrors[] = "Echec du televersement pour {$originalName}.";
                     continue;
                 }
 
+                if ($size > $maxFileSize) {
+                    $uploadErrors[] = "{$originalName} depasse la taille maximale de 20 Mo.";
+                    continue;
+                }
+
                 $filename = clean_filename($originalName);
-                $size = (int)($files['size'][$i] ?? 0);
                 $mime = $files['type'][$i] ?? 'application/octet-stream';
                 if (function_exists('mime_content_type')) {
                     $detected = mime_content_type($tmpName);
@@ -180,7 +194,7 @@ ob_start();
             <label id="drop-area" class="relative flex h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-[#d3c6ba] bg-[#f9f3ed] px-4 text-center text-sm text-[#6d6258] hover:border-[#1f2d3a] hover:text-[#1f2d3a]">
                 <input id="documents-input" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" type="file" name="documents[]" multiple accept="*/*">
                 <span class="text-sm font-semibold text-[#0f0f0f]">Glisser-deposer vos fichiers</span>
-                <span class="text-xs text-[#6d6258]">Ou cliquez pour parcourir • Tous formats</span>
+                <span class="text-xs text-[#6d6258]">Ou cliquez pour parcourir - Tous formats - Max 5 fichiers - 20 Mo/fichier</span>
             </label>
             <div id="pending-list" class="rounded-2xl border border-[#e3d7cc] bg-[#f6f1eb] px-4 py-4 text-sm text-[#6d6258] hidden"></div>
             <button
@@ -265,6 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelDeleteBtn = document.getElementById('cancel-delete');
     if (!input || !dropArea || !pendingList || !importButton || !deleteModal || !deleteModalName || !confirmDeleteBtn || !cancelDeleteBtn) return;
 
+    const MAX_FILES = 5;
     let formToDelete = null;
 
     let dataTransfer = new DataTransfer();
@@ -297,9 +312,10 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const setFiles = (fileList) => {
+        const limited = fileList.slice(0, MAX_FILES);
         dataTransfer = new DataTransfer();
-        for (let i = 0; i < fileList.length; i++) {
-            dataTransfer.items.add(fileList[i]);
+        for (let i = 0; i < limited.length; i++) {
+            dataTransfer.items.add(limited[i]);
         }
         input.files = dataTransfer.files;
         refreshList();
