@@ -2,7 +2,7 @@
 $active = $active ?? '';
 $integrations = $integrations ?? [];
 ?>
-<aside class="flex h-full flex-col gap-8 border-r border-[#e3d7cc] bg-white px-6 py-8">
+<aside class="flex h-full flex-col gap-8 border-r border-[#e3d7cc] bg-white px-6 py-8 lg:sticky lg:top-0 lg:h-screen lg:overflow-hidden">
     <div>
         <p class="text-xs uppercase tracking-[0.4em] text-[#6d6258]">Cube Portal</p>
         <p class="mt-2 text-lg font-semibold text-[#0f0f0f]">CESI Projects</p>
@@ -48,7 +48,8 @@ $integrations = $integrations ?? [];
                 <span>Espace admin</span>
             </a>
         <?php endif; ?>
-        <div class="mt-auto"></div>
+    </nav>
+    <div class="mt-auto flex flex-col gap-2">
         <a class="flex items-center gap-3 rounded-2xl px-4 py-3 text-[#b3261e] hover:bg-[#b3261e]/10" href="/logout">
             <svg class="h-4 w-4 text-[#b3261e]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
@@ -57,8 +58,8 @@ $integrations = $integrations ?? [];
             </svg>
             <span>Se deconnecter</span>
         </a>
-    </nav>
-    <div class="rounded-3xl border border-[#e3d7cc] bg-[#f9f3ed] px-4 py-4 text-xs text-[#6d6258]">
-        Acces securise. Pensez a changer le mot de passe apres la premiere connexion.
+        <div class="rounded-3xl border border-[#e3d7cc] bg-[#f9f3ed] px-4 py-4 text-xs text-[#6d6258]">
+            Acces securise. Pensez a changer le mot de passe apres la premiere connexion.
+        </div>
     </div>
 </aside>

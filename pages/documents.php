@@ -184,7 +184,8 @@ ob_start();
             </label>
             <div id="pending-list" class="rounded-2xl border border-[#e3d7cc] bg-[#f6f1eb] px-4 py-4 text-sm text-[#6d6258] hidden"></div>
             <button
-                class="rounded-full px-6 py-3 text-sm font-semibold text-white <?= $tableReady ? 'bg-[#1f2d3a] shadow-lg shadow-[#1f2d3a]/30' : 'bg-[#b8b0a7] cursor-not-allowed' ?>"
+                id="import-button"
+                class="hidden rounded-full px-6 py-3 text-sm font-semibold text-white <?= $tableReady ? 'bg-[#1f2d3a] shadow-lg shadow-[#1f2d3a]/30' : 'bg-[#b8b0a7] cursor-not-allowed' ?>"
                 type="submit"
                 <?= $tableReady ? '' : 'disabled aria-disabled="true"' ?>
             >
@@ -257,11 +258,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('documents-input');
     const dropArea = document.getElementById('drop-area');
     const pendingList = document.getElementById('pending-list');
+    const importButton = document.getElementById('import-button');
     const deleteModal = document.getElementById('delete-modal');
     const deleteModalName = document.getElementById('delete-modal-name');
     const confirmDeleteBtn = document.getElementById('confirm-delete');
     const cancelDeleteBtn = document.getElementById('cancel-delete');
-    if (!input || !dropArea || !pendingList || !deleteModal || !deleteModalName || !confirmDeleteBtn || !cancelDeleteBtn) return;
+    if (!input || !dropArea || !pendingList || !importButton || !deleteModal || !deleteModalName || !confirmDeleteBtn || !cancelDeleteBtn) return;
 
     let formToDelete = null;
 
@@ -272,6 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!files || files.length === 0) {
             pendingList.classList.add('hidden');
             pendingList.innerHTML = '';
+            importButton.classList.add('hidden');
             return;
         }
         const items = [];
@@ -290,6 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         pendingList.innerHTML = items.join('');
         pendingList.classList.remove('hidden');
+        importButton.classList.remove('hidden');
     };
 
     const setFiles = (fileList) => {

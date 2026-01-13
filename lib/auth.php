@@ -7,18 +7,33 @@ function current_user(PDO $pdo): ?array
         return null;
     }
 
-    $stmt = $pdo->prepare('SELECT id, email, name, role FROM users WHERE id = :id LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, email, name, role, is_active FROM users WHERE id = :id LIMIT 1');
     $stmt->execute([':id' => $_SESSION['user_id']]);
     $user = $stmt->fetch();
 
-    return $user ?: null;
+    if (!$user) {
+        return null;
+    }
+
+    if ((int)($user['is_active'] ?? 0) !== 1) {
+        unset($_SESSION['user_id']);
+        $_SESSION['inactive_user'] = true;
+        return null;
+    }
+
+    return $user;
 }
 
 function require_auth(PDO $pdo): array
 {
     $user = current_user($pdo);
     if (!$user) {
-        header('Location: /connexion');
+        if (!empty($_SESSION['inactive_user'])) {
+            unset($_SESSION['inactive_user']);
+            header('Location: /connexion?inactive=1');
+        } else {
+            header('Location: /connexion');
+        }
         exit;
     }
     return $user;
