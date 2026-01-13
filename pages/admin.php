@@ -5,6 +5,7 @@ $bodyClass = '';
 $useTailwind = true;
 $active = 'admin';
 $integrations = require __DIR__ . '/../lib/integrations.php';
+require __DIR__ . '/../templates/modal.php';
 
 $errors = [];
 $successes = [];
@@ -218,11 +219,16 @@ ob_start();
                                         <?= (int)$row['is_active'] === 1 ? 'Desactiver' : 'Reactiver' ?>
                                     </button>
                                 </form>
-                                <form method="post">
+                                <form method="post" class="delete-user-form">
                                     <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="user_id" value="<?= e((string)$row['id']) ?>">
-                                    <button class="rounded-full bg-[#b3261e] px-3 py-2 text-xs font-semibold text-white hover:bg-[#921c17]" type="submit" onclick="return confirm('Supprimer ce compte ?');">
+                                    <button
+                                        class="rounded-full bg-[#b3261e] px-3 py-2 text-xs font-semibold text-white hover:bg-[#921c17]"
+                                        type="button"
+                                        data-delete-user="true"
+                                        data-user-name="<?= e($row['name'] ?: $row['email']) ?>"
+                                    >
                                         Supprimer
                                     </button>
                                 </form>
@@ -234,47 +240,61 @@ ob_start();
         </table>
     </div>
 </section>
-<div id="edit-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/30 px-4">
-    <div class="w-full max-w-lg rounded-3xl border border-[#e3d7cc] bg-white p-6 shadow-2xl">
-        <p class="text-xs uppercase tracking-[0.3em] text-[#a09082]">Edition</p>
-        <h3 class="mt-3 text-lg font-semibold text-[#0f0f0f]">Modifier l'utilisateur</h3>
-        <form method="post" class="mt-6 grid gap-4" id="edit-form">
-            <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
-            <input type="hidden" name="action" value="update">
-            <input type="hidden" name="user_id" id="edit-user-id-modal">
-            <label class="block text-sm font-medium text-[#2b2723]">
-                Nom
-                <input type="text" name="edit_name" id="edit-name"
-                       class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-            </label>
-            <label class="block text-sm font-medium text-[#2b2723]">
-                Email
-                <input type="email" name="edit_email" id="edit-email" required
-                       class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-            </label>
-            <label class="block text-sm font-medium text-[#2b2723]">
-                Role
-                <select name="edit_role" id="edit-role" class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-                    <option value="user">Utilisateur</option>
-                    <option value="admin">Admin</option>
-                </select>
-            </label>
-            <label class="block text-sm font-medium text-[#2b2723]">
-                Mot de passe (optionnel)
-                <input type="password" name="edit_password" id="edit-password"
-                       class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-            </label>
-            <label class="flex items-center gap-2 text-sm font-medium text-[#2b2723]">
-                <input type="checkbox" name="edit_is_active" id="edit-active" class="h-4 w-4 rounded border-[#e3d7cc]">
-                Compte actif
-            </label>
-            <div class="flex flex-wrap gap-3">
-                <button class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="submit">Enregistrer</button>
-                <button type="button" id="edit-cancel" class="rounded-full border border-[#e3d7cc] px-6 py-3 text-sm font-semibold text-[#1f2d3a]">Annuler</button>
-            </div>
-        </form>
-    </div>
-</div>
+<?php
+render_modal(
+    'edit-modal',
+    "Modifier l'utilisateur",
+    'Edition',
+    '
+    <form method="post" class="mt-3 grid gap-4" id="edit-form">
+        <input type="hidden" name="csrf_token" value="' . e(csrf_token()) . '">
+        <input type="hidden" name="action" value="update">
+        <input type="hidden" name="user_id" id="edit-user-id-modal">
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Nom
+            <input type="text" name="edit_name" id="edit-name"
+                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+        </label>
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Email
+            <input type="email" name="edit_email" id="edit-email" required
+                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+        </label>
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Role
+            <select name="edit_role" id="edit-role" class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+                <option value="user">Utilisateur</option>
+                <option value="admin">Admin</option>
+            </select>
+        </label>
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Mot de passe (optionnel)
+            <input type="password" name="edit_password" id="edit-password"
+                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+        </label>
+        <label class="flex items-center gap-2 text-sm font-medium text-[#2b2723]">
+            <input type="checkbox" name="edit_is_active" id="edit-active" class="h-4 w-4 rounded border-[#e3d7cc]">
+            Compte actif
+        </label>
+        <div class="flex flex-wrap gap-3">
+            <button class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="submit">Enregistrer</button>
+            <button type="button" id="edit-cancel" class="rounded-full border border-[#e3d7cc] px-6 py-3 text-sm font-semibold text-[#1f2d3a]">Annuler</button>
+        </div>
+    </form>
+    '
+);
+
+render_modal(
+    'delete-user-modal',
+    'Supprimer ce compte ?',
+    'Confirmation',
+    '<p id="delete-user-name" class="mt-1 text-sm text-[#6d6258]"></p>',
+    '<div class="flex flex-wrap items-center gap-3">
+        <button id="delete-user-confirm" class="rounded-full bg-[#b3261e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#921c17]" type="button">Supprimer</button>
+        <button id="delete-user-cancel" class="rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]" type="button">Annuler</button>
+    </div>'
+);
+?>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('edit-modal');
@@ -285,7 +305,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const roleSelect = document.getElementById('edit-role');
     const activeCheckbox = document.getElementById('edit-active');
     const passwordInput = document.getElementById('edit-password');
-    if (!modal || !cancelBtn || !userIdField || !nameInput || !emailInput || !roleSelect || !activeCheckbox || !passwordInput) return;
+    const deleteModal = document.getElementById('delete-user-modal');
+    const deleteName = document.getElementById('delete-user-name');
+    const deleteConfirm = document.getElementById('delete-user-confirm');
+    const deleteCancel = document.getElementById('delete-user-cancel');
+    if (!modal || !cancelBtn || !userIdField || !nameInput || !emailInput || !roleSelect || !activeCheckbox || !passwordInput || !deleteModal || !deleteName || !deleteConfirm || !deleteCancel) return;
 
     const closeModal = () => {
         modal.classList.add('hidden');
@@ -312,6 +336,39 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             closeModal();
+        }
+    });
+
+    let deleteForm = null;
+    document.querySelectorAll('button[data-delete-user]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            deleteForm = btn.closest('form');
+            deleteName.textContent = btn.dataset.userName || 'Utilisateur';
+            deleteModal.classList.remove('hidden');
+        });
+    });
+
+    const closeDeleteModal = () => {
+        deleteModal.classList.add('hidden');
+        deleteForm = null;
+    };
+
+    deleteCancel.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeDeleteModal();
+    });
+
+    deleteConfirm.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (deleteForm) {
+            deleteForm.submit();
+        }
+        closeDeleteModal();
+    });
+
+    deleteModal.addEventListener('click', (e) => {
+        if (e.target === deleteModal) {
+            closeDeleteModal();
         }
     });
 });

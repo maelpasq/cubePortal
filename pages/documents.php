@@ -5,6 +5,7 @@ $bodyClass = '';
 $useTailwind = true;
 $active = 'documents';
 $integrations = require __DIR__ . '/../lib/integrations.php';
+require __DIR__ . '/../templates/modal.php';
 $pageEyebrow = 'Documents';
 $pageTitle = 'Gestion des documents';
 $pageLead = 'Deposez vos fichiers puis consultez ou telechargez-les.';
@@ -239,17 +240,18 @@ ob_start();
         </div>
     </article>
 </section>
-<div id="delete-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/30 px-4 flex">
-    <div class="w-full max-w-md rounded-3xl border border-[#e3d7cc] bg-white p-6 shadow-2xl">
-        <p class="text-xs uppercase tracking-[0.3em] text-[#a09082]">Confirmation</p>
-        <h3 class="mt-3 text-lg font-semibold text-[#0f0f0f]">Supprimer ce document ?</h3>
-        <p id="delete-modal-name" class="mt-2 text-sm text-[#6d6258]"></p>
-        <div class="mt-6 flex flex-wrap items-center gap-3">
-            <button id="confirm-delete" class="rounded-full bg-[#b3261e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#921c17]" type="button">Supprimer</button>
-            <button id="cancel-delete" class="rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]" type="button">Annuler</button>
-        </div>
-    </div>
-</div>
+<?php
+render_modal(
+    'delete-modal',
+    'Supprimer ce document ?',
+    'Confirmation',
+    '<p id="delete-modal-name" class="mt-1 text-sm text-[#6d6258]"></p>',
+    '<div class="flex flex-wrap items-center gap-3">
+        <button id="confirm-delete" class="rounded-full bg-[#b3261e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#921c17]" type="button">Supprimer</button>
+        <button id="cancel-delete" class="rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]" type="button">Annuler</button>
+    </div>'
+);
+?>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('documents-input');
