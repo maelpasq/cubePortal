@@ -58,34 +58,13 @@ $user = current_user($pdo);
                 <p class="mt-2 text-sm text-white/70">Centralisez les infos critiques avant la prochaine revue.</p>
             </div>
         </div>
+
+        <footer class="bg-[#0f0f0f] text-white">
+            <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-8 text-sm text-white/70">
+                <span>Cube Portal (c) <?= date('Y') ?></span>
+                <span>Infrastructure CESI</span>
+            </div>
+        </footer>
     </main>
 </div>
-
-<section id="features" class="bg-white">
-    <div class="mx-auto w-full max-w-6xl px-6 py-14">
-        <h2 class="text-3xl font-semibold text-[#0f0f0f]">Fonctionnalites essentielles</h2>
-        <p class="mt-3 text-sm text-[#6d6258]">Un socle clair pour organiser l'information projet.</p>
-        <div class="mt-8 grid gap-6 md:grid-cols-3">
-            <div class="rounded-3xl border border-[#e3d7cc] bg-[#f9f3ed] p-6">
-                <h3 class="text-lg font-semibold">Referentiel unique</h3>
-                <p class="mt-3 text-sm text-[#6d6258]">Une source de verite pour les informations du projet Cube.</p>
-            </div>
-            <div class="rounded-3xl border border-[#e3d7cc] bg-[#f9f3ed] p-6">
-                <h3 class="text-lg font-semibold">Acces securise</h3>
-                <p class="mt-3 text-sm text-[#6d6258]">Sessions protegees, mots de passe chiffres, roles distincts.</p>
-            </div>
-            <div class="rounded-3xl border border-[#e3d7cc] bg-[#f9f3ed] p-6">
-                <h3 class="text-lg font-semibold">Espace admin</h3>
-                <p class="mt-3 text-sm text-[#6d6258]">Creation des comptes et gestion centralisee des acces.</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<footer class="bg-[#0f0f0f] text-white">
-    <div class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-8 text-sm text-white/70">
-        <span>Cube Portal (c) <?= date('Y') ?></span>
-        <span>Infrastructure CESI</span>
-    </div>
-</footer>
 <?php require __DIR__ . '/../templates/footer.php'; ?>
