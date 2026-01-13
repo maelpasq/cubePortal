@@ -28,8 +28,7 @@ function require_admin(PDO $pdo): array
 {
     $user = require_auth($pdo);
     if ($user['role'] !== 'admin') {
-        http_response_code(403);
-        echo 'Access denied.';
+        header('Location: /dashboard');
         exit;
     }
     return $user;

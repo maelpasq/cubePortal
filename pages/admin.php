@@ -6,10 +6,14 @@ $useTailwind = true;
 $active = 'admin';
 $integrations = require __DIR__ . '/../lib/integrations.php';
 
+$errors = [];
+$successes = [];
+
 if (is_post()) {
+    $action = $_POST['action'] ?? 'create';
     if (!csrf_verify($_POST['csrf_token'] ?? null)) {
-        $error = 'Jeton de securite invalide.';
-    } else {
+        $errors[] = 'Jeton de securite invalide.';
+    } elseif ($action === 'create') {
         $name = trim((string)($_POST['name'] ?? ''));
         $email = trim((string)($_POST['email'] ?? ''));
         $role = ($_POST['role'] ?? 'user') === 'admin' ? 'admin' : 'user';
@@ -17,12 +21,12 @@ if (is_post()) {
         $isActive = isset($_POST['is_active']) ? 1 : 0;
 
         if ($email === '' || $password === '') {
-            $error = 'Email et mot de passe requis.';
+            $errors[] = 'Email et mot de passe requis.';
         } else {
             $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
             $stmt->execute([':email' => $email]);
             if ($stmt->fetch()) {
-                $error = 'Cet email existe deja.';
+                $errors[] = 'Cet email existe deja.';
             } else {
                 $hash = password_hash($password, PASSWORD_DEFAULT);
                 $insert = $pdo->prepare('INSERT INTO users (email, name, password_hash, role, is_active) VALUES (:email, :name, :hash, :role, :active)');
@@ -33,8 +37,83 @@ if (is_post()) {
                     ':role' => $role,
                     ':active' => $isActive,
                 ]);
-                $success = 'Compte cree avec succes.';
+                $successes[] = 'Compte cree avec succes.';
             }
+        }
+    } elseif ($action === 'update') {
+        $userId = (int)($_POST['user_id'] ?? 0);
+        $name = trim((string)($_POST['edit_name'] ?? ''));
+        $email = trim((string)($_POST['edit_email'] ?? ''));
+        $role = ($_POST['edit_role'] ?? 'user') === 'admin' ? 'admin' : 'user';
+        $isActive = isset($_POST['edit_is_active']) ? 1 : 0;
+        $password = (string)($_POST['edit_password'] ?? '');
+
+        if ($userId <= 0 || $email === '') {
+            $errors[] = 'Selectionnez un utilisateur et renseignez un email.';
+        } else {
+            $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email AND id <> :id LIMIT 1');
+            $stmt->execute([':email' => $email, ':id' => $userId]);
+            if ($stmt->fetch()) {
+                $errors[] = 'Un autre compte utilise deja cet email.';
+            } else {
+                $fields = [
+                    'name' => $name,
+                    'email' => $email,
+                    'role' => $role,
+                    'is_active' => $isActive,
+                ];
+                $setParts = ['name = :name', 'email = :email', 'role = :role', 'is_active = :active'];
+                if ($password !== '') {
+                    $fields['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+                    $setParts[] = 'password_hash = :password_hash';
+                }
+                $setSql = implode(', ', $setParts);
+                $fields['id'] = $userId;
+
+                try {
+                    $stmt = $pdo->prepare("UPDATE users SET {$setSql} WHERE id = :id");
+                    $stmt->bindValue(':name', $fields['name']);
+                    $stmt->bindValue(':email', $fields['email']);
+                    $stmt->bindValue(':role', $fields['role']);
+                    $stmt->bindValue(':active', $fields['is_active'], PDO::PARAM_INT);
+                    if (isset($fields['password_hash'])) {
+                        $stmt->bindValue(':password_hash', $fields['password_hash']);
+                    }
+                    $stmt->bindValue(':id', $fields['id'], PDO::PARAM_INT);
+                    $stmt->execute();
+                    $successes[] = 'Compte mis a jour.';
+                } catch (Throwable $e) {
+                    $errors[] = 'Impossible de mettre a jour le compte : ' . $e->getMessage();
+                }
+            }
+        }
+    } elseif ($action === 'toggle') {
+        $userId = (int)($_POST['user_id'] ?? 0);
+        if ($userId <= 0) {
+            $errors[] = 'Utilisateur invalide.';
+        } else {
+            $stmt = $pdo->prepare('SELECT is_active FROM users WHERE id = :id');
+            $stmt->execute([':id' => $userId]);
+            $row = $stmt->fetch();
+            if (!$row) {
+                $errors[] = 'Utilisateur introuvable.';
+            } else {
+                $newStatus = (int)$row['is_active'] === 1 ? 0 : 1;
+                $update = $pdo->prepare('UPDATE users SET is_active = :status WHERE id = :id');
+                $update->execute([':status' => $newStatus, ':id' => $userId]);
+                $successes[] = $newStatus === 1 ? 'Compte reactive.' : 'Compte desactive.';
+            }
+        }
+    } elseif ($action === 'delete') {
+        $userId = (int)($_POST['user_id'] ?? 0);
+        if ($userId <= 0) {
+            $errors[] = 'Utilisateur invalide.';
+        } elseif ($userId === (int)$user['id']) {
+            $errors[] = 'Vous ne pouvez pas supprimer votre propre compte.';
+        } else {
+            $delete = $pdo->prepare('DELETE FROM users WHERE id = :id');
+            $delete->execute([':id' => $userId]);
+            $successes[] = 'Compte supprime.';
         }
     }
 }
@@ -48,13 +127,13 @@ $pageLead = 'Gerez les comptes et acces a Cube Portal.';
 
 ob_start();
 ?>
-<?php if (!empty($error)): ?>
+<?php if (!empty($errors)): ?>
     <div class="mt-6 rounded-2xl border border-[#f2b1b1] bg-[#ffe5e5] px-4 py-3 text-sm">
-        <?= e($error) ?>
+        <?= e(implode(' ', $errors)) ?>
     </div>
-<?php elseif (!empty($success)): ?>
+<?php elseif (!empty($successes)): ?>
     <div class="mt-6 rounded-2xl border border-[#b7e1c0] bg-[#e6f7e9] px-4 py-3 text-sm">
-        <?= e($success) ?>
+        <?= e(implode(' ', $successes)) ?>
     </div>
 <?php endif; ?>
 
@@ -62,6 +141,7 @@ ob_start();
     <h2 class="text-xl font-semibold text-[#0f0f0f]">Creer un compte</h2>
     <form method="post" class="mt-6 grid gap-4 md:grid-cols-2">
         <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+        <input type="hidden" name="action" value="create">
         <label class="block text-sm font-medium text-[#2b2723]">
             Nom
             <input type="text" name="name" placeholder="Nom complet"
@@ -95,6 +175,60 @@ ob_start();
 </section>
 
 <section class="mt-8 rounded-3xl border border-[#e3d7cc] bg-white p-6">
+    <h2 class="text-xl font-semibold text-[#0f0f0f]">Mettre a jour un compte</h2>
+    <form method="post" class="mt-6 grid gap-4 md:grid-cols-2" id="edit-form">
+        <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+        <input type="hidden" name="action" value="update">
+        <label class="block text-sm font-medium text-[#2b2723] md:col-span-2">
+            Selectionner un utilisateur
+            <select name="user_id" id="edit-user-id"
+                    class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none" required>
+                <option value="">Choisir...</option>
+                <?php foreach ($users as $row): ?>
+                    <option value="<?= e((string)$row['id']) ?>"
+                            data-name="<?= e($row['name'] ?? '') ?>"
+                            data-email="<?= e($row['email'] ?? '') ?>"
+                            data-role="<?= e($row['role'] ?? 'user') ?>"
+                            data-active="<?= (int)$row['is_active'] === 1 ? '1' : '0' ?>"
+                    >
+                        <?= e(($row['name'] ?: $row['email']) . ' (' . $row['email'] . ')') ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </label>
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Nom
+            <input type="text" name="edit_name" id="edit-name"
+                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+        </label>
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Email
+            <input type="email" name="edit_email" id="edit-email" required
+                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+        </label>
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Role
+            <select name="edit_role" id="edit-role" class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+                <option value="user">Utilisateur</option>
+                <option value="admin">Admin</option>
+            </select>
+        </label>
+        <label class="block text-sm font-medium text-[#2b2723]">
+            Mot de passe (optionnel)
+            <input type="password" name="edit_password" id="edit-password"
+                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+        </label>
+        <label class="flex items-center gap-2 text-sm font-medium text-[#2b2723]">
+            <input type="checkbox" name="edit_is_active" id="edit-active" class="h-4 w-4 rounded border-[#e3d7cc]">
+            Compte actif
+        </label>
+        <div class="md:col-span-2">
+            <button class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="submit">Mettre a jour</button>
+        </div>
+    </form>
+</section>
+
+<section class="mt-8 rounded-3xl border border-[#e3d7cc] bg-white p-6">
     <h2 class="text-xl font-semibold text-[#0f0f0f]">Comptes existants</h2>
     <div class="mt-6 overflow-x-auto">
         <table class="w-full text-left text-sm">
@@ -105,6 +239,7 @@ ob_start();
                     <th class="pb-3">Role</th>
                     <th class="pb-3">Statut</th>
                     <th class="pb-3">Creation</th>
+                    <th class="pb-3">Actions</th>
                 </tr>
             </thead>
             <tbody class="text-[#2b2723]">
@@ -115,12 +250,53 @@ ob_start();
                         <td class="py-3"><?= e($row['role']) ?></td>
                         <td class="py-3"><?= (int)$row['is_active'] === 1 ? 'Actif' : 'Inactif' ?></td>
                         <td class="py-3"><?= e($row['created_at']) ?></td>
+                        <td class="py-3">
+                            <div class="flex flex-wrap gap-2">
+                                <form method="post">
+                                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                                    <input type="hidden" name="action" value="toggle">
+                                    <input type="hidden" name="user_id" value="<?= e((string)$row['id']) ?>">
+                                    <button class="rounded-full border border-[#e3d7cc] px-3 py-2 text-xs font-semibold text-[#1f2d3a]" type="submit">
+                                        <?= (int)$row['is_active'] === 1 ? 'Desactiver' : 'Reactiver' ?>
+                                    </button>
+                                </form>
+                                <form method="post">
+                                    <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="user_id" value="<?= e((string)$row['id']) ?>">
+                                    <button class="rounded-full bg-[#b3261e] px-3 py-2 text-xs font-semibold text-white hover:bg-[#921c17]" type="submit" onclick="return confirm('Supprimer ce compte ?');">
+                                        Supprimer
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     </div>
 </section>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('edit-user-id');
+    const nameInput = document.getElementById('edit-name');
+    const emailInput = document.getElementById('edit-email');
+    const roleSelect = document.getElementById('edit-role');
+    const activeCheckbox = document.getElementById('edit-active');
+    const passwordInput = document.getElementById('edit-password');
+    if (!select || !nameInput || !emailInput || !roleSelect || !activeCheckbox || !passwordInput) return;
+
+    select.addEventListener('change', () => {
+        const option = select.options[select.selectedIndex];
+        if (!option) return;
+        nameInput.value = option.dataset.name || '';
+        emailInput.value = option.dataset.email || '';
+        roleSelect.value = option.dataset.role || 'user';
+        activeCheckbox.checked = option.dataset.active === '1';
+        passwordInput.value = '';
+    });
+});
+</script>
 <?php
 $content = ob_get_clean();
 require __DIR__ . '/../templates/app-shell.php';
