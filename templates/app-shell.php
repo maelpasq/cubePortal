@@ -8,7 +8,7 @@ $integrations = $integrations ?? [];
 require __DIR__ . '/head.php';
 ?>
 <div class="min-h-screen w-full bg-[#f6f1eb]">
-    <div class="grid min-h-screen w-full grid-cols-1 lg:grid-cols-[260px_1fr]">
+    <div class="grid min-h-screen w-full grid-cols-1 lg:grid-cols-[300px_1fr]">
         <?php require __DIR__ . '/sidebar.php'; ?>
         <main class="px-6 py-10 lg:px-10">
             <?php if ($pageTitle !== '' || $pageLead !== ''): ?>
