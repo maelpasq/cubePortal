@@ -5,7 +5,7 @@ $useTailwind = true;
 require __DIR__ . '/../templates/head.php';
 $user = current_user($pdo);
 ?>
-<div class="min-h-screen bg-[#f6f1eb] text-[#0f0f0f]">
+<div class="flex min-h-screen flex-col bg-[#f6f1eb] text-[#0f0f0f]">
     <header class="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-8">
         <div class="flex items-center gap-3">
             <div class="h-10 w-10 rounded-2xl bg-[#0f0f0f]"></div>
@@ -25,7 +25,7 @@ $user = current_user($pdo);
         <?php endif; ?>
     </header>
 
-    <main class="mx-auto grid w-full max-w-6xl grid-cols-1 gap-10 px-6 pb-16 pt-6 lg:grid-cols-2 lg:items-center">
+    <main class="mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 gap-10 px-6 pb-16 pt-6 lg:grid-cols-2 lg:items-center">
         <div>
             <p class="text-xs uppercase tracking-[0.4em] text-[#6d6258]">SaaS interne CESI</p>
             <h1 class="mt-4 text-4xl font-semibold leading-tight text-[#0f0f0f] sm:text-5xl">La base vivante des projets Cube.</h1>
