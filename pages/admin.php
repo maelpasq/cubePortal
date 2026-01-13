@@ -175,60 +175,6 @@ ob_start();
 </section>
 
 <section class="mt-8 rounded-3xl border border-[#e3d7cc] bg-white p-6">
-    <h2 class="text-xl font-semibold text-[#0f0f0f]">Mettre a jour un compte</h2>
-    <form method="post" class="mt-6 grid gap-4 md:grid-cols-2" id="edit-form">
-        <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
-        <input type="hidden" name="action" value="update">
-        <label class="block text-sm font-medium text-[#2b2723] md:col-span-2">
-            Selectionner un utilisateur
-            <select name="user_id" id="edit-user-id"
-                    class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none" required>
-                <option value="">Choisir...</option>
-                <?php foreach ($users as $row): ?>
-                    <option value="<?= e((string)$row['id']) ?>"
-                            data-name="<?= e($row['name'] ?? '') ?>"
-                            data-email="<?= e($row['email'] ?? '') ?>"
-                            data-role="<?= e($row['role'] ?? 'user') ?>"
-                            data-active="<?= (int)$row['is_active'] === 1 ? '1' : '0' ?>"
-                    >
-                        <?= e(($row['name'] ?: $row['email']) . ' (' . $row['email'] . ')') ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-        </label>
-        <label class="block text-sm font-medium text-[#2b2723]">
-            Nom
-            <input type="text" name="edit_name" id="edit-name"
-                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-        </label>
-        <label class="block text-sm font-medium text-[#2b2723]">
-            Email
-            <input type="email" name="edit_email" id="edit-email" required
-                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-        </label>
-        <label class="block text-sm font-medium text-[#2b2723]">
-            Role
-            <select name="edit_role" id="edit-role" class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-                <option value="user">Utilisateur</option>
-                <option value="admin">Admin</option>
-            </select>
-        </label>
-        <label class="block text-sm font-medium text-[#2b2723]">
-            Mot de passe (optionnel)
-            <input type="password" name="edit_password" id="edit-password"
-                   class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
-        </label>
-        <label class="flex items-center gap-2 text-sm font-medium text-[#2b2723]">
-            <input type="checkbox" name="edit_is_active" id="edit-active" class="h-4 w-4 rounded border-[#e3d7cc]">
-            Compte actif
-        </label>
-        <div class="md:col-span-2">
-            <button class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="submit">Mettre a jour</button>
-        </div>
-    </form>
-</section>
-
-<section class="mt-8 rounded-3xl border border-[#e3d7cc] bg-white p-6">
     <h2 class="text-xl font-semibold text-[#0f0f0f]">Comptes existants</h2>
     <div class="mt-6 overflow-x-auto">
         <table class="w-full text-left text-sm">
@@ -252,6 +198,18 @@ ob_start();
                         <td class="py-3"><?= e($row['created_at']) ?></td>
                         <td class="py-3">
                             <div class="flex flex-wrap gap-2">
+                                <button
+                                    class="rounded-full border border-[#e3d7cc] px-3 py-2 text-xs font-semibold text-[#1f2d3a]"
+                                    type="button"
+                                    data-edit="true"
+                                    data-id="<?= e((string)$row['id']) ?>"
+                                    data-name="<?= e($row['name'] ?? '') ?>"
+                                    data-email="<?= e($row['email'] ?? '') ?>"
+                                    data-role="<?= e($row['role'] ?? 'user') ?>"
+                                    data-active="<?= (int)$row['is_active'] === 1 ? '1' : '0' ?>"
+                                >
+                                    Modifier
+                                </button>
                                 <form method="post">
                                     <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                                     <input type="hidden" name="action" value="toggle">
@@ -276,24 +234,85 @@ ob_start();
         </table>
     </div>
 </section>
+<div id="edit-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/30 px-4">
+    <div class="w-full max-w-lg rounded-3xl border border-[#e3d7cc] bg-white p-6 shadow-2xl">
+        <p class="text-xs uppercase tracking-[0.3em] text-[#a09082]">Edition</p>
+        <h3 class="mt-3 text-lg font-semibold text-[#0f0f0f]">Modifier l'utilisateur</h3>
+        <form method="post" class="mt-6 grid gap-4" id="edit-form">
+            <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="user_id" id="edit-user-id-modal">
+            <label class="block text-sm font-medium text-[#2b2723]">
+                Nom
+                <input type="text" name="edit_name" id="edit-name"
+                       class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+            </label>
+            <label class="block text-sm font-medium text-[#2b2723]">
+                Email
+                <input type="email" name="edit_email" id="edit-email" required
+                       class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+            </label>
+            <label class="block text-sm font-medium text-[#2b2723]">
+                Role
+                <select name="edit_role" id="edit-role" class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+                    <option value="user">Utilisateur</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </label>
+            <label class="block text-sm font-medium text-[#2b2723]">
+                Mot de passe (optionnel)
+                <input type="password" name="edit_password" id="edit-password"
+                       class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+            </label>
+            <label class="flex items-center gap-2 text-sm font-medium text-[#2b2723]">
+                <input type="checkbox" name="edit_is_active" id="edit-active" class="h-4 w-4 rounded border-[#e3d7cc]">
+                Compte actif
+            </label>
+            <div class="flex flex-wrap gap-3">
+                <button class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="submit">Enregistrer</button>
+                <button type="button" id="edit-cancel" class="rounded-full border border-[#e3d7cc] px-6 py-3 text-sm font-semibold text-[#1f2d3a]">Annuler</button>
+            </div>
+        </form>
+    </div>
+</div>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const select = document.getElementById('edit-user-id');
+    const modal = document.getElementById('edit-modal');
+    const cancelBtn = document.getElementById('edit-cancel');
+    const userIdField = document.getElementById('edit-user-id-modal');
     const nameInput = document.getElementById('edit-name');
     const emailInput = document.getElementById('edit-email');
     const roleSelect = document.getElementById('edit-role');
     const activeCheckbox = document.getElementById('edit-active');
     const passwordInput = document.getElementById('edit-password');
-    if (!select || !nameInput || !emailInput || !roleSelect || !activeCheckbox || !passwordInput) return;
+    if (!modal || !cancelBtn || !userIdField || !nameInput || !emailInput || !roleSelect || !activeCheckbox || !passwordInput) return;
 
-    select.addEventListener('change', () => {
-        const option = select.options[select.selectedIndex];
-        if (!option) return;
-        nameInput.value = option.dataset.name || '';
-        emailInput.value = option.dataset.email || '';
-        roleSelect.value = option.dataset.role || 'user';
-        activeCheckbox.checked = option.dataset.active === '1';
+    const closeModal = () => {
+        modal.classList.add('hidden');
         passwordInput.value = '';
+    };
+
+    document.querySelectorAll('button[data-edit]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            userIdField.value = btn.dataset.id || '';
+            nameInput.value = btn.dataset.name || '';
+            emailInput.value = btn.dataset.email || '';
+            roleSelect.value = btn.dataset.role || 'user';
+            activeCheckbox.checked = btn.dataset.active === '1';
+            passwordInput.value = '';
+            modal.classList.remove('hidden');
+        });
+    });
+
+    cancelBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        closeModal();
+    });
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
     });
 });
 </script>
