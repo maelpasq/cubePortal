@@ -2,7 +2,7 @@
 $title = 'Cube Portal - Connexion';
 $bodyClass = '';
 $useTailwind = true;
-$loginImage = '/assets/img/login-visual2.png';
+$loginImage = '/assets/img/login-image-v1.png';
 
 if (current_user($pdo)) {
     header('Location: /dashboard');
