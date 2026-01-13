@@ -62,6 +62,19 @@ if ($tableReady && is_post()) {
 
     if (!csrf_verify($_POST['csrf_token'] ?? null)) {
         $uploadErrors[] = 'Jeton de securite invalide.';
+    } elseif ($action === 'bulk_delete') {
+        $ids = array_filter(array_map('intval', $_POST['selected_ids'] ?? []));
+        if (empty($ids)) {
+            $deleteErrors[] = 'Aucun document selectionne.';
+        } else {
+            $in = implode(',', array_fill(0, count($ids), '?'));
+            $stmt = $pdo->prepare("DELETE FROM documents WHERE id IN ($in)");
+            if ($stmt->execute($ids)) {
+                $deleteSuccess[] = 'Documents supprimes.';
+            } else {
+                $deleteErrors[] = 'Erreur lors de la suppression multiple.';
+            }
+        }
     } elseif ($action === 'delete') {
         $docId = isset($_POST['document_id']) ? (int)$_POST['document_id'] : 0;
         if ($docId <= 0) {
@@ -135,23 +148,6 @@ if ($tableReady && is_post()) {
                 } catch (Throwable $e) {
                     $uploadErrors[] = "Impossible d'enregistrer {$originalName} : " . $e->getMessage();
                 }
-            }
-        }
-    }
-} elseif ($tableReady && ($_POST['action'] ?? '') === 'bulk_delete') {
-    if (!csrf_verify($_POST['csrf_token'] ?? null)) {
-        $deleteErrors[] = 'Jeton de securite invalide.';
-    } else {
-        $ids = array_filter(array_map('intval', $_POST['selected_ids'] ?? []));
-        if (empty($ids)) {
-            $deleteErrors[] = 'Aucun document selectionne.';
-        } else {
-            $in = implode(',', array_fill(0, count($ids), '?'));
-            $stmt = $pdo->prepare("DELETE FROM documents WHERE id IN ($in)");
-            if ($stmt->execute($ids)) {
-                $deleteSuccess[] = 'Documents supprimes.';
-            } else {
-                $deleteErrors[] = 'Erreur lors de la suppression multiple.';
             }
         }
     }
@@ -261,7 +257,7 @@ ob_start();
                     <input type="hidden" name="action" value="bulk_delete">
                     <ul class="mt-6 divide-y divide-[#efe7df]">
                         <?php foreach ($documents as $document): ?>
-                            <li class="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                            <li class="document-row flex flex-col gap-3 rounded-2xl py-3 transition sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                                 <div class="flex items-center gap-3">
                                     <input type="checkbox" name="selected_ids[]" value="<?= e((string)$document['id']) ?>" class="selection-checkbox hidden h-4 w-4 rounded border-[#e3d7cc] text-[#1f2d3a] focus:ring-0">
                                     <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f6f1eb] text-xs font-semibold text-[#1f2d3a]">
@@ -537,24 +533,54 @@ document.addEventListener('DOMContentLoaded', () => {
         const updateBulkState = () => {
             const anyChecked = checkboxes.some((cb) => cb.checked);
             bulkDeleteBtn.disabled = !anyChecked;
+            checkboxes.forEach((cb) => {
+                const row = cb.closest('.document-row');
+                if (!row) return;
+                if (cb.checked) {
+                    row.classList.add('ring-2', 'ring-[#1f2d3a]');
+                } else {
+                    row.classList.remove('ring-2', 'ring-[#1f2d3a]');
+                }
+            });
         };
         toggleSelectBtn.addEventListener('click', () => {
             selectionMode = !selectionMode;
             if (selectionMode) {
                 toggleSelectBtn.classList.add('bg-[#1f2d3a]', 'text-white');
                 bulkBar.classList.remove('hidden');
-                checkboxes.forEach((cb) => cb.classList.remove('hidden'));
+                checkboxes.forEach((cb) => {
+                    cb.classList.remove('hidden');
+                    const row = cb.closest('.document-row');
+                    if (row) row.classList.add('cursor-pointer');
+                });
             } else {
                 toggleSelectBtn.classList.remove('bg-[#1f2d3a]', 'text-white');
                 bulkBar.classList.add('hidden');
                 checkboxes.forEach((cb) => {
                     cb.checked = false;
                     cb.classList.add('hidden');
+                    const row = cb.closest('.document-row');
+                    if (row) row.classList.remove('ring-2', 'ring-[#1f2d3a]', 'cursor-pointer');
                 });
                 bulkDeleteBtn.disabled = true;
             }
+            updateBulkState();
         });
-        checkboxes.forEach((cb) => cb.addEventListener('change', updateBulkState));
+        checkboxes.forEach((cb) => {
+            cb.addEventListener('change', updateBulkState);
+            const row = cb.closest('.document-row');
+            if (row) {
+                row.addEventListener('click', (e) => {
+                    if (!selectionMode) return;
+                    const target = e.target;
+                    if (target instanceof HTMLElement && target.closest('a, button')) {
+                        return;
+                    }
+                    cb.checked = !cb.checked;
+                    updateBulkState();
+                });
+            }
+        });
         bulkDeleteBtn.addEventListener('click', (e) => {
             if (bulkDeleteBtn.disabled) {
                 e.preventDefault();
