@@ -11,6 +11,8 @@ $pageLead = 'Deposez vos fichiers puis consultez ou telechargez-les.';
 
 $uploadSuccess = [];
 $uploadErrors = [];
+$deleteSuccess = [];
+$deleteErrors = [];
 $tableReady = true;
 $tableError = '';
 
@@ -53,50 +55,71 @@ function clean_filename(string $name): string
 }
 
 if ($tableReady && is_post()) {
+    $action = $_POST['action'] ?? 'upload';
+
     if (!csrf_verify($_POST['csrf_token'] ?? null)) {
         $uploadErrors[] = 'Jeton de securite invalide.';
-    } elseif (!isset($_FILES['documents'])) {
-        $uploadErrors[] = 'Aucun fichier selectionne.';
-    } else {
-        $files = $_FILES['documents'];
-        $total = is_array($files['name']) ? count($files['name']) : 0;
-
-        for ($i = 0; $i < $total; $i++) {
-            $error = $files['error'][$i] ?? UPLOAD_ERR_NO_FILE;
-            $tmpName = $files['tmp_name'][$i] ?? '';
-            $originalName = $files['name'][$i] ?? 'document';
-
-            if ($error !== UPLOAD_ERR_OK || !is_uploaded_file($tmpName)) {
-                $uploadErrors[] = "Echec du televersement pour {$originalName}.";
-                continue;
-            }
-
-            $filename = clean_filename($originalName);
-            $size = (int)($files['size'][$i] ?? 0);
-            $mime = $files['type'][$i] ?? 'application/octet-stream';
-            if (function_exists('mime_content_type')) {
-                $detected = mime_content_type($tmpName);
-                if ($detected) {
-                    $mime = $detected;
-                }
-            }
-
-            $content = file_get_contents($tmpName);
-            if ($content === false) {
-                $uploadErrors[] = "Impossible de lire le fichier {$originalName}.";
-                continue;
-            }
-
+    } elseif ($action === 'delete') {
+        $docId = isset($_POST['document_id']) ? (int)$_POST['document_id'] : 0;
+        if ($docId <= 0) {
+            $deleteErrors[] = 'Document invalide.';
+        } else {
             try {
-                $stmt = $pdo->prepare('INSERT INTO documents (filename, mime_type, size_bytes, content) VALUES (:filename, :mime, :size, :content)');
-                $stmt->bindValue(':filename', $filename, PDO::PARAM_STR);
-                $stmt->bindValue(':mime', $mime, PDO::PARAM_STR);
-                $stmt->bindValue(':size', $size, PDO::PARAM_INT);
-                $stmt->bindValue(':content', $content, PDO::PARAM_LOB);
-                $stmt->execute();
-                $uploadSuccess[] = $filename;
+                $stmt = $pdo->prepare('DELETE FROM documents WHERE id = :id');
+                $stmt->execute([':id' => $docId]);
+                if ($stmt->rowCount() > 0) {
+                    $deleteSuccess[] = 'Document supprime.';
+                } else {
+                    $deleteErrors[] = 'Document introuvable.';
+                }
             } catch (Throwable $e) {
-                $uploadErrors[] = "Impossible d'enregistrer {$originalName} : " . $e->getMessage();
+                $deleteErrors[] = "Erreur lors de la suppression : " . $e->getMessage();
+            }
+        }
+    } else {
+        if (!isset($_FILES['documents'])) {
+            $uploadErrors[] = 'Aucun fichier selectionne.';
+        } else {
+            $files = $_FILES['documents'];
+            $total = is_array($files['name']) ? count($files['name']) : 0;
+
+            for ($i = 0; $i < $total; $i++) {
+                $error = $files['error'][$i] ?? UPLOAD_ERR_NO_FILE;
+                $tmpName = $files['tmp_name'][$i] ?? '';
+                $originalName = $files['name'][$i] ?? 'document';
+
+                if ($error !== UPLOAD_ERR_OK || !is_uploaded_file($tmpName)) {
+                    $uploadErrors[] = "Echec du televersement pour {$originalName}.";
+                    continue;
+                }
+
+                $filename = clean_filename($originalName);
+                $size = (int)($files['size'][$i] ?? 0);
+                $mime = $files['type'][$i] ?? 'application/octet-stream';
+                if (function_exists('mime_content_type')) {
+                    $detected = mime_content_type($tmpName);
+                    if ($detected) {
+                        $mime = $detected;
+                    }
+                }
+
+                $content = file_get_contents($tmpName);
+                if ($content === false) {
+                    $uploadErrors[] = "Impossible de lire le fichier {$originalName}.";
+                    continue;
+                }
+
+                try {
+                    $stmt = $pdo->prepare('INSERT INTO documents (filename, mime_type, size_bytes, content) VALUES (:filename, :mime, :size, :content)');
+                    $stmt->bindValue(':filename', $filename, PDO::PARAM_STR);
+                    $stmt->bindValue(':mime', $mime, PDO::PARAM_STR);
+                    $stmt->bindValue(':size', $size, PDO::PARAM_INT);
+                    $stmt->bindValue(':content', $content, PDO::PARAM_LOB);
+                    $stmt->execute();
+                    $uploadSuccess[] = $filename;
+                } catch (Throwable $e) {
+                    $uploadErrors[] = "Impossible d'enregistrer {$originalName} : " . $e->getMessage();
+                }
             }
         }
     }
@@ -137,6 +160,16 @@ ob_start();
         <?php if (!empty($uploadErrors)): ?>
             <div class="mt-6 rounded-2xl border border-[#f2b1b1] bg-[#ffe5e5] px-4 py-3 text-sm text-[#7d2b2b]">
                 <?= e(implode(' ', $uploadErrors)) ?>
+            </div>
+        <?php endif; ?>
+        <?php if (!empty($deleteSuccess)): ?>
+            <div class="mt-6 rounded-2xl border border-[#d3e6d5] bg-[#f1fbf3] px-4 py-3 text-sm text-[#2f6b3a]">
+                <?= e(implode(' ', $deleteSuccess)) ?>
+            </div>
+        <?php endif; ?>
+        <?php if (!empty($deleteErrors)): ?>
+            <div class="mt-6 rounded-2xl border border-[#f2b1b1] bg-[#ffe5e5] px-4 py-3 text-sm text-[#7d2b2b]">
+                <?= e(implode(' ', $deleteErrors)) ?>
             </div>
         <?php endif; ?>
 
@@ -189,6 +222,14 @@ ob_start();
                         <div class="flex flex-shrink-0 items-center gap-2 text-sm">
                             <a class="rounded-full border border-[#e3d7cc] px-3 py-2 text-[#1f2d3a]" href="/documents/download?id=<?= e((string)$document['id']) ?>" target="_blank" rel="noreferrer">Ouvrir</a>
                             <a class="rounded-full bg-[#1f2d3a] px-3 py-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1">Telecharger</a>
+                            <form method="post" class="inline">
+                                <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="document_id" value="<?= e((string)$document['id']) ?>">
+                                <button class="rounded-full bg-[#b3261e] px-3 py-2 font-semibold text-white hover:bg-[#921c17]" type="submit" onclick="return confirm('Supprimer ce document ?');">
+                                    Supprimer
+                                </button>
+                            </form>
                         </div>
                     </li>
                 <?php endforeach; ?>
