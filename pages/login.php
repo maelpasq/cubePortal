@@ -2,7 +2,7 @@
 $title = 'Cube Portal - Connexion';
 $bodyClass = '';
 $useTailwind = true;
-$loginImage = '/assets/img/login-visual.png';
+$loginImage = '/assets/img/login-visual2.png';
 
 if (current_user($pdo)) {
     header('Location: /dashboard');
@@ -84,7 +84,7 @@ require __DIR__ . '/../templates/head.php';
         </div>
         
         <div class="relative hidden lg:block">
-            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('<?= filemtime(__DIR__ . e($loginImage)) ?>');"></div>
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('<?= e($loginImage) ?>');"></div>
             <div class="absolute inset-0 bg-gradient-to-tr from-[#0f0f0f]/60 via-transparent to-transparent"></div>
             <div class="absolute bottom-10 left-10 max-w-sm text-white">
                 <p class="text-xs uppercase tracking-[0.3em] text-white/70">SaaS interne CESI</p>
