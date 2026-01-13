@@ -43,8 +43,16 @@ require __DIR__ . '/../templates/head.php';
 ?>
 <div class="min-h-screen w-full bg-[#f6f1eb] text-[#0f0f0f]">
     <div class="grid min-h-screen w-full grid-cols-1 lg:grid-cols-2">
-        <div class="flex flex-col justify-center px-6 py-12 sm:px-12 lg:px-16">
-            <div class="max-w-md">
+        <div class="relative hidden lg:block">
+            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('<?= e($loginImage) ?>');"></div>
+            <div class="absolute inset-0 bg-gradient-to-tr from-[#0f0f0f]/60 via-transparent to-transparent"></div>
+            <div class="absolute bottom-10 left-10 max-w-sm text-white">
+                <p class="text-xs uppercase tracking-[0.3em] text-white/70">SaaS interne CESI</p>
+                <h2 class="mt-3 text-3xl font-semibold">Centralisez les infos des projets Cube.</h2>
+            </div>
+        </div>
+        <div class="flex items-center justify-center px-6 py-12 sm:px-12 lg:px-16">
+            <div class="w-full max-w-md">
                 <div class="mb-8">
                     <p class="text-xs uppercase tracking-[0.4em] text-[#6d6258]">Cube Portal</p>
                     <h1 class="mt-3 text-4xl font-semibold leading-tight text-[#0f0f0f]">Connexion</h1>
@@ -74,14 +82,6 @@ require __DIR__ . '/../templates/head.php';
                 <div class="mt-6 text-sm text-[#6d6258]">
                     <a class="font-medium text-[#1f2d3a]" href="/">Retour a l'accueil</a>
                 </div>
-            </div>
-        </div>
-        <div class="relative hidden lg:block">
-            <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('<?= e($loginImage) ?>');"></div>
-            <div class="absolute inset-0 bg-gradient-to-tr from-[#0f0f0f]/60 via-transparent to-transparent"></div>
-            <div class="absolute bottom-10 left-10 max-w-sm text-white">
-                <p class="text-xs uppercase tracking-[0.3em] text-white/70">SaaS interne CESI</p>
-                <h2 class="mt-3 text-3xl font-semibold">Centralisez les infos des projets Cube.</h2>
             </div>
         </div>
     </div>
