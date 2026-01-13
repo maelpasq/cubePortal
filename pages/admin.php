@@ -187,8 +187,11 @@ ob_start();
                                     <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                                     <input type="hidden" name="action" value="toggle">
                                     <input type="hidden" name="user_id" value="<?= e((string)$row['id']) ?>">
-                                    <button class="rounded-full border border-[#e3d7cc] px-3 py-2 text-xs font-semibold text-[#1f2d3a]" type="submit">
-                                        <?= (int)$row['is_active'] === 1 ? 'Desactiver' : 'Reactiver' ?>
+                                    <button class="rounded-full border border-[#e3d7cc] p-2 text-xs font-semibold text-[#1f2d3a]" type="submit" aria-label="<?= (int)$row['is_active'] === 1 ? 'Desactiver' : 'Reactiver' ?>">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M5 12h14" />
+                                            <path d="M12 5v14" />
+                                        </svg>
                                     </button>
                                 </form>
                                 <form method="post" class="delete-user-form">
@@ -196,12 +199,13 @@ ob_start();
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="user_id" value="<?= e((string)$row['id']) ?>">
                                     <button
-                                        class="rounded-full bg-[#b3261e] px-3 py-2 text-xs font-semibold text-white hover:bg-[#921c17]"
+                                        class="rounded-full bg-[#b3261e] p-2 text-xs font-semibold text-white hover:bg-[#921c17]"
                                         type="button"
                                         data-delete-user="true"
                                         data-user-name="<?= e($row['name'] ?: $row['email']) ?>"
+                                        aria-label="Supprimer"
                                     >
-                                        Supprimer
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
                                     </button>
                                 </form>
                             </div>

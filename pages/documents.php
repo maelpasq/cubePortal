@@ -172,11 +172,11 @@ ob_start();
 ?>
 <section class="mt-8 space-y-6">
     <article class="rounded-3xl border border-[#e3d7cc] bg-white p-6">
-        <div class="flex items-start justify-between gap-4">
-            <div>
-                <p class="text-sm font-semibold text-[#0f0f0f]">Deposer des documents</p>
-                <p class="mt-2 text-sm text-[#6d6258]">Glissez vos fichiers ici ou cliquez pour les ajouter. Tous formats acceptes.</p>
-            </div>
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <p class="text-sm font-semibold text-[#0f0f0f]">Deposer des documents</p>
+                    <p class="mt-2 text-sm text-[#6d6258]">Glissez vos fichiers ici ou cliquez pour les ajouter. Tous formats acceptes.</p>
+                </div>
         </div>
 
         <?php if (!$tableReady && $tableError !== ''): ?>
@@ -216,10 +216,11 @@ ob_start();
             <div id="pending-list" class="rounded-2xl border border-[#e3d7cc] bg-[#f6f1eb] px-4 py-4 text-sm text-[#6d6258] hidden"></div>
             <button
                 id="import-button"
-                class="hidden rounded-full px-6 py-3 text-sm font-semibold text-white <?= $tableReady ? 'bg-[#1f2d3a] shadow-lg shadow-[#1f2d3a]/30' : 'bg-[#b8b0a7] cursor-not-allowed' ?>"
+                class="hidden inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white <?= $tableReady ? 'bg-[#1f2d3a] shadow-lg shadow-[#1f2d3a]/30' : 'bg-[#b8b0a7] cursor-not-allowed' ?>"
                 type="submit"
                 <?= $tableReady ? '' : 'disabled aria-disabled="true"' ?>
             >
+                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                 Importer les fichiers
             </button>
         </form>
@@ -232,11 +233,17 @@ ob_start();
                 </div>
                 <?php if (!empty($documents)): ?>
                     <div class="flex items-center gap-2">
-                        <button id="toggle-select" type="button" class="rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]">Selectionner</button>
+                        <button id="toggle-select" type="button" class="inline-flex items-center gap-2 rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 12h18M3 19h18"/></svg>
+                            Selectionner
+                        </button>
                         <form id="bulk-delete-form" method="post" class="hidden">
                             <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                             <input type="hidden" name="action" value="bulk_delete">
-                            <button id="bulk-delete-btn" class="rounded-full bg-[#b3261e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#921c17]" type="submit" disabled>Supprimer la selection</button>
+                            <button id="bulk-delete-btn" class="inline-flex items-center gap-2 rounded-full bg-[#b3261e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#921c17]" type="submit" disabled>
+                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
+                                Supprimer
+                            </button>
                         </form>
                     </div>
                 <?php endif; ?>
@@ -267,15 +274,19 @@ ob_start();
                                         <p class="text-xs text-[#6d6258]"><?= e(format_bytes((int)($document['size_bytes'] ?? 0))) ?> - <?= e(date('d/m/Y H:i', strtotime($document['created_at'] ?? 'now'))) ?></p>
                                     </div>
                                 </div>
-                                <div class="flex flex-wrap items-center gap-2 text-sm">
-                                    <a class="rounded-full border border-[#e3d7cc] px-3 py-2 text-[#1f2d3a]" href="/documents/download?id=<?= e((string)$document['id']) ?>" target="_blank" rel="noreferrer">Ouvrir</a>
-                                    <a class="rounded-full bg-[#1f2d3a] px-3 py-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1">Telecharger</a>
+                            <div class="flex flex-wrap items-center gap-2 text-sm">
+                                    <a class="rounded-full border border-[#e3d7cc] p-2 text-[#1f2d3a]" href="/documents/download?id=<?= e((string)$document['id']) ?>" target="_blank" rel="noreferrer" aria-label="Ouvrir">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+                                    </a>
+                                    <a class="rounded-full bg-[#1f2d3a] p-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1" aria-label="Telecharger">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 13l-7 7-7-7"/></svg>
+                                    </a>
                                     <form method="post" class="inline">
                                         <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                                         <input type="hidden" name="action" value="delete">
                                         <input type="hidden" name="document_id" value="<?= e((string)$document['id']) ?>">
-                                        <button class="rounded-full bg-[#b3261e] px-3 py-2 font-semibold text-white hover:bg-[#921c17]" type="submit" data-delete="true" data-doc-name="<?= e($document['filename'] ?? 'Document') ?>">
-                                            Supprimer
+                                        <button class="rounded-full bg-[#b3261e] p-2 font-semibold text-white hover:bg-[#921c17]" type="submit" data-delete="true" data-doc-name="<?= e($document['filename'] ?? 'Document') ?>" aria-label="Supprimer">
+                                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
                                         </button>
                                     </form>
                                 </div>
@@ -294,8 +305,14 @@ render_modal(
     'Confirmation',
     '<p id="delete-modal-name" class="mt-1 text-sm text-[#6d6258]"></p>',
     '<div class="flex flex-wrap items-center gap-3">
-        <button id="confirm-delete" class="rounded-full bg-[#b3261e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#921c17]" type="button">Supprimer</button>
-        <button id="cancel-delete" class="rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]" type="button">Annuler</button>
+        <button id="confirm-delete" class="inline-flex items-center gap-2 rounded-full bg-[#b3261e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#921c17]" type="button">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
+            Supprimer
+        </button>
+        <button id="cancel-delete" class="inline-flex items-center gap-2 rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]" type="button">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            Annuler
+        </button>
     </div>'
 );
 
@@ -307,8 +324,14 @@ render_modal(
     <div id="limit-error" class="mt-2 text-sm text-[#b3261e] hidden"></div>
     <div id="limit-files-list" class="mt-3 max-h-64 space-y-2 overflow-auto"></div>',
     '<div class="flex flex-wrap items-center gap-3">
-        <button id="limit-confirm" class="rounded-full bg-[#1f2d3a] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="button">Valider</button>
-        <button id="limit-cancel" class="rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]" type="button">Annuler</button>
+        <button id="limit-confirm" class="inline-flex items-center gap-2 rounded-full bg-[#1f2d3a] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="button">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
+            Valider
+        </button>
+        <button id="limit-cancel" class="inline-flex items-center gap-2 rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]" type="button">
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            Annuler
+        </button>
     </div>'
 );
 ?>
