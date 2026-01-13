@@ -237,14 +237,12 @@ ob_start();
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 12h18M3 19h18"/></svg>
                             Selectionner
                         </button>
-                        <form id="bulk-delete-form" method="post" class="hidden">
-                            <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
-                            <input type="hidden" name="action" value="bulk_delete">
-                            <button id="bulk-delete-btn" class="inline-flex items-center gap-2 rounded-full bg-[#b3261e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#921c17]" type="submit" disabled>
+                        <div id="bulk-delete-bar" class="hidden">
+                            <button id="bulk-delete-btn" class="inline-flex items-center gap-2 rounded-full bg-[#b3261e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#921c17]" type="button" disabled>
                                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
                                 Supprimer
                             </button>
-                        </form>
+                        </div>
                     </div>
                 <?php endif; ?>
             </div>
@@ -352,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const limitCancel = document.getElementById('limit-cancel');
     const toggleSelectBtn = document.getElementById('toggle-select');
     const documentsListForm = document.getElementById('documents-list-form');
-    const bulkBar = document.getElementById('bulk-delete-form');
+    const bulkBar = document.getElementById('bulk-delete-bar');
     const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
     if (!input || !dropArea || !pendingList || !importButton || !deleteModal || !deleteModalName || !confirmDeleteBtn || !cancelDeleteBtn || !limitModal || !limitList || !limitError || !limitConfirm || !limitCancel) return;
 
@@ -535,7 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Mode selection multiple pour suppression
     if (toggleSelectBtn && documentsListForm && bulkBar && bulkDeleteBtn) {
-        const checkboxes = Array.from(document.querySelectorAll('.selection-checkbox'));
+        const checkboxes = Array.from(documentsListForm.querySelectorAll('.selection-checkbox'));
         const updateBulkState = () => {
             const anyChecked = checkboxes.some((cb) => cb.checked);
             bulkDeleteBtn.disabled = !anyChecked;
@@ -557,10 +555,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         checkboxes.forEach((cb) => cb.addEventListener('change', updateBulkState));
-        documentsListForm.addEventListener('submit', (e) => {
+        bulkDeleteBtn.addEventListener('click', (e) => {
             if (bulkDeleteBtn.disabled) {
                 e.preventDefault();
+                return;
             }
+            documentsListForm.submit();
         });
     }
 });
