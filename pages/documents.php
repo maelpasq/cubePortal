@@ -239,7 +239,7 @@ ob_start();
         </div>
     </article>
 </section>
-<div id="delete-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/30 px-4">
+<div id="delete-modal" class="fixed inset-0 z-40 hidden items-center justify-center bg-black/30 px-4 flex">
     <div class="w-full max-w-md rounded-3xl border border-[#e3d7cc] bg-white p-6 shadow-2xl">
         <p class="text-xs uppercase tracking-[0.3em] text-[#a09082]">Confirmation</p>
         <h3 class="mt-3 text-lg font-semibold text-[#0f0f0f]">Supprimer ce document ?</h3>
