@@ -9,15 +9,30 @@ $pageEyebrow = 'Documents';
 $pageTitle = 'Gestion des documents';
 $pageLead = 'Deposez vos fichiers puis consultez ou telechargez-les.';
 
-$documentsDir = __DIR__ . '/../assets/documents';
-if (!is_dir($documentsDir)) {
-    mkdir($documentsDir, 0775, true);
-}
-
 $uploadSuccess = [];
 $uploadErrors = [];
+$tableReady = true;
+$tableError = '';
 
-function format_bytes(int $bytes): string {
+// S'assure que la table existe pour stocker les fichiers en base.
+try {
+    $pdo->exec(
+        "CREATE TABLE IF NOT EXISTS documents (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            filename VARCHAR(255) NOT NULL,
+            mime_type VARCHAR(190) NOT NULL DEFAULT 'application/octet-stream',
+            size_bytes BIGINT UNSIGNED NOT NULL DEFAULT 0,
+            content LONGBLOB NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB"
+    );
+} catch (Throwable $e) {
+    $tableReady = false;
+    $tableError = "Impossible de preparer le stockage des documents : " . $e->getMessage();
+}
+
+function format_bytes(int $bytes): string
+{
     $units = ['o', 'Ko', 'Mo', 'Go'];
     $i = 0;
     while ($bytes >= 1024 && $i < count($units) - 1) {
@@ -27,18 +42,17 @@ function format_bytes(int $bytes): string {
     return round($bytes, 1) . ' ' . $units[$i];
 }
 
-function sanitize_filename(string $name): string {
-    $base = pathinfo($name, PATHINFO_FILENAME);
-    $ext = pathinfo($name, PATHINFO_EXTENSION);
-    $base = preg_replace('/[^A-Za-z0-9_-]/', '_', $base);
-    $ext = $ext !== '' ? '.' . preg_replace('/[^A-Za-z0-9]/', '', $ext) : '';
-    if ($base === '') {
-        $base = 'document';
+function clean_filename(string $name): string
+{
+    $name = trim(str_replace(["\r", "\n"], ' ', $name));
+    if ($name === '') {
+        $name = 'document';
     }
-    return $base . $ext;
+    $short = function_exists('mb_substr') ? mb_substr($name, 0, 190) : substr($name, 0, 190);
+    return $short === '' ? 'document' : $short;
 }
 
-if (is_post()) {
+if ($tableReady && is_post()) {
     if (!csrf_verify($_POST['csrf_token'] ?? null)) {
         $uploadErrors[] = 'Jeton de securite invalide.';
     } elseif (!isset($_FILES['documents'])) {
@@ -57,49 +71,47 @@ if (is_post()) {
                 continue;
             }
 
-            $safeName = sanitize_filename($originalName);
-            $target = $documentsDir . '/' . $safeName;
-            $suffix = 1;
-            while (file_exists($target)) {
-                $target = $documentsDir . '/' . pathinfo($safeName, PATHINFO_FILENAME) . '-' . $suffix;
-                $extension = pathinfo($safeName, PATHINFO_EXTENSION);
-                if ($extension !== '') {
-                    $target .= '.' . $extension;
+            $filename = clean_filename($originalName);
+            $size = (int)($files['size'][$i] ?? 0);
+            $mime = $files['type'][$i] ?? 'application/octet-stream';
+            if (function_exists('mime_content_type')) {
+                $detected = mime_content_type($tmpName);
+                if ($detected) {
+                    $mime = $detected;
                 }
-                $suffix++;
             }
 
-            if (!move_uploaded_file($tmpName, $target)) {
-                $uploadErrors[] = "Impossible d'enregistrer {$originalName}.";
+            $content = file_get_contents($tmpName);
+            if ($content === false) {
+                $uploadErrors[] = "Impossible de lire le fichier {$originalName}.";
                 continue;
             }
 
-            $uploadSuccess[] = basename($target);
+            try {
+                $stmt = $pdo->prepare('INSERT INTO documents (filename, mime_type, size_bytes, content) VALUES (:filename, :mime, :size, :content)');
+                $stmt->bindValue(':filename', $filename, PDO::PARAM_STR);
+                $stmt->bindValue(':mime', $mime, PDO::PARAM_STR);
+                $stmt->bindValue(':size', $size, PDO::PARAM_INT);
+                $stmt->bindValue(':content', $content, PDO::PARAM_LOB);
+                $stmt->execute();
+                $uploadSuccess[] = $filename;
+            } catch (Throwable $e) {
+                $uploadErrors[] = "Impossible d'enregistrer {$originalName} : " . $e->getMessage();
+            }
         }
     }
 }
 
 $documents = [];
-$paths = glob($documentsDir . '/*') ?: [];
-foreach ($paths as $path) {
-    if (!is_file($path)) {
-        continue;
+if ($tableReady) {
+    try {
+        $stmt = $pdo->query('SELECT id, filename, mime_type, size_bytes, created_at FROM documents ORDER BY created_at DESC');
+        $documents = $stmt->fetchAll() ?: [];
+    } catch (Throwable $e) {
+        $tableError = "Impossible de charger les documents : " . $e->getMessage();
+        $tableReady = false;
     }
-    $name = basename($path);
-    $timestamp = (int)filemtime($path);
-    $documents[] = [
-        'name' => $name,
-        'url' => '/assets/documents/' . rawurlencode($name),
-        'size' => format_bytes((int)filesize($path)),
-        'updated' => date('d/m/Y H:i', $timestamp),
-        'timestamp' => $timestamp,
-        'extension' => strtoupper(pathinfo($path, PATHINFO_EXTENSION) ?: 'FILE'),
-    ];
 }
-
-usort($documents, function ($a, $b) {
-    return ($b['timestamp'] ?? 0) <=> ($a['timestamp'] ?? 0);
-});
 
 ob_start();
 ?>
@@ -112,6 +124,11 @@ ob_start();
             </div>
         </div>
 
+        <?php if (!$tableReady && $tableError !== ''): ?>
+            <div class="mt-6 rounded-2xl border border-[#f2b1b1] bg-[#ffe5e5] px-4 py-3 text-sm text-[#7d2b2b]">
+                <?= e($tableError) ?>
+            </div>
+        <?php endif; ?>
         <?php if (!empty($uploadSuccess)): ?>
             <div class="mt-6 rounded-2xl border border-[#d3e6d5] bg-[#f1fbf3] px-4 py-3 text-sm text-[#2f6b3a]">
                 Fichiers ajoutes: <?= e(implode(', ', $uploadSuccess)) ?>
@@ -130,7 +147,11 @@ ob_start();
                 <span class="text-sm font-semibold text-[#0f0f0f]">Glisser-deposer vos fichiers</span>
                 <span class="text-xs text-[#6d6258]">Ou cliquez pour parcourir • Tous formats</span>
             </label>
-            <button class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="submit">
+            <button
+                class="rounded-full px-6 py-3 text-sm font-semibold text-white <?= $tableReady ? 'bg-[#1f2d3a] shadow-lg shadow-[#1f2d3a]/30' : 'bg-[#b8b0a7] cursor-not-allowed' ?>"
+                type="submit"
+                <?= $tableReady ? '' : 'disabled aria-disabled="true"' ?>
+            >
                 Importer les fichiers
             </button>
         </form>
@@ -144,7 +165,11 @@ ob_start();
             </div>
         </div>
 
-        <?php if (empty($documents)): ?>
+        <?php if (!$tableReady && $tableError !== ''): ?>
+            <div class="mt-6 rounded-2xl border border-[#f2b1b1] bg-[#ffe5e5] px-4 py-3 text-sm text-[#7d2b2b]">
+                <?= e($tableError) ?>
+            </div>
+        <?php elseif (empty($documents)): ?>
             <div class="mt-6 rounded-2xl border border-[#e3d7cc] bg-[#f9f3ed] px-4 py-4 text-sm text-[#6d6258]">
                 Aucun fichier pour le moment. Deposez vos documents pour les retrouver ici.
             </div>
@@ -154,16 +179,16 @@ ob_start();
                     <li class="flex items-center justify-between gap-4 py-3">
                         <div class="flex items-center gap-3">
                             <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#f6f1eb] text-xs font-semibold text-[#1f2d3a]">
-                                <?= e($document['extension']) ?>
+                                <?= e(strtoupper(pathinfo($document['filename'] ?? 'FILE', PATHINFO_EXTENSION) ?: 'FILE')) ?>
                             </div>
                             <div>
-                                <p class="text-sm font-semibold text-[#0f0f0f]"><?= e($document['name']) ?></p>
-                                <p class="text-xs text-[#6d6258]"><?= e($document['size']) ?> • <?= e($document['updated']) ?></p>
+                                <p class="text-sm font-semibold text-[#0f0f0f]"><?= e($document['filename'] ?? 'Document') ?></p>
+                                <p class="text-xs text-[#6d6258]"><?= e(format_bytes((int)($document['size_bytes'] ?? 0))) ?> • <?= e(date('d/m/Y H:i', strtotime($document['created_at'] ?? 'now'))) ?></p>
                             </div>
                         </div>
                         <div class="flex flex-shrink-0 items-center gap-2 text-sm">
-                            <a class="rounded-full border border-[#e3d7cc] px-3 py-2 text-[#1f2d3a]" href="<?= e($document['url']) ?>" target="_blank" rel="noreferrer">Ouvrir</a>
-                            <a class="rounded-full bg-[#1f2d3a] px-3 py-2 font-semibold text-white" href="<?= e($document['url']) ?>" download>Telecharger</a>
+                            <a class="rounded-full border border-[#e3d7cc] px-3 py-2 text-[#1f2d3a]" href="/documents/download?id=<?= e((string)$document['id']) ?>" target="_blank" rel="noreferrer">Ouvrir</a>
+                            <a class="rounded-full bg-[#1f2d3a] px-3 py-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1">Telecharger</a>
                         </div>
                     </li>
                 <?php endforeach; ?>
