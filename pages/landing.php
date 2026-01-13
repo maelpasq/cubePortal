@@ -21,7 +21,7 @@ $user = current_user($pdo);
         <?php if ($user): ?>
             <a class="rounded-full border border-[#e3d7cc] bg-white px-5 py-2 text-sm font-semibold" href="/dashboard">Dashboard</a>
         <?php else: ?>
-            <a class="rounded-full border border-[#e3d7cc] bg-white px-5 py-2 text-sm font-semibold" href="/connexion">Connexion</a>
+            <a class="rounded-full border border-[#e3d7cc] bg-white px-5 py-2 text-sm font-semibold" href="/login">Connexion</a>
         <?php endif; ?>
     </header>
 
@@ -29,9 +29,9 @@ $user = current_user($pdo);
         <div>
             <p class="text-xs uppercase tracking-[0.4em] text-[#6d6258]">SaaS interne CESI</p>
             <h1 class="mt-4 text-4xl font-semibold leading-tight text-[#0f0f0f] sm:text-5xl">La base vivante des projets Cube.</h1>
-            <p class="mt-5 text-base text-[#6d6258]">Centralisez les contacts, documents, livrables et informations cles pour piloter chaque projet Cube en un seul endroit.</p>
+            <p class="mt-5 text-base text-[#6d6258]">Centralisez les contacts, documents, livrables et informations clés pour piloter chaque projet Cube en un seul endroit.</p>
             <div class="mt-8 flex flex-wrap gap-3">
-                <a class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" href="/connexion">Acceder au portail</a>
+                <a class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" href="/login">Accéder au portail</a>
                 <a class="rounded-full border border-[#1f2d3a] px-6 py-3 text-sm font-semibold text-[#1f2d3a]" href="#features">Voir les modules</a>
             </div>
             <div class="mt-10 grid gap-4 sm:grid-cols-2">

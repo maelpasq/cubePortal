@@ -7,7 +7,7 @@ $active = 'dashboard';
 $integrations = require __DIR__ . '/../../lib/integrations.php';
 $pageEyebrow = 'Bienvenue';
 $pageTitle = 'Tableau de bord';
-$pageLead = 'Bonjour ' . ($user['name'] ?: $user['email']) . '. Voici l\'etat des projets Cube.';
+$pageLead = 'Bonjour ' . ($user['name'] ?: $user['email']) . '. Voici l’état des projets Cube.';
 
 ob_start();
 ?>
@@ -20,10 +20,10 @@ ob_start();
     <article class="rounded-3xl border border-[#e3d7cc] bg-white p-6">
         <p class="text-sm font-semibold">Livrables</p>
         <p class="mt-4 text-3xl font-semibold text-[#0f0f0f]">12</p>
-        <p class="mt-2 text-xs text-[#6d6258]">Documents references a completer</p>
+        <p class="mt-2 text-xs text-[#6d6258]">Documents référencés à compléter</p>
     </article>
     <article class="rounded-3xl border border-[#e3d7cc] bg-white p-6">
-        <p class="text-sm font-semibold">Contacts cles</p>
+        <p class="text-sm font-semibold">Contacts clés</p>
         <p class="mt-4 text-3xl font-semibold text-[#0f0f0f]">18</p>
         <p class="mt-2 text-xs text-[#6d6258]">Partenaires et tuteurs CESI</p>
     </article>
@@ -31,7 +31,7 @@ ob_start();
 
 <section class="mt-8 rounded-3xl border border-[#e3d7cc] bg-[#0f0f0f] p-8 text-white">
     <h2 class="text-2xl font-semibold">Focus du jour</h2>
-    <p class="mt-3 text-sm text-white/70">Centralisez les informations critiques et partagez-les avec l'equipe projet pour conserver une vision claire.</p>
+    <p class="mt-3 text-sm text-white/70">Centralisez les informations critiques et partagez-les avec l’équipe projet pour conserver une vision claire.</p>
 </section>
 <?php
 $content = ob_get_clean();

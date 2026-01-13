@@ -8,7 +8,7 @@ $integrations = require __DIR__ . '/../../lib/integrations.php';
 require __DIR__ . '/../../templates/modal.php';
 $pageEyebrow = 'Documents';
 $pageTitle = 'Gestion des documents';
-$pageLead = 'Deposez vos fichiers puis consultez ou telechargez-les.';
+$pageLead = 'Déposez vos fichiers puis consultez ou téléchargez-les.';
 
 $uploadSuccess = [];
 $uploadErrors = [];
@@ -61,16 +61,16 @@ if ($tableReady && is_post()) {
     $action = $_POST['action'] ?? 'upload';
 
     if (!csrf_verify($_POST['csrf_token'] ?? null)) {
-        $uploadErrors[] = 'Jeton de securite invalide.';
+        $uploadErrors[] = 'Jeton de sécurité invalide.';
     } elseif ($action === 'bulk_delete') {
         $ids = array_filter(array_map('intval', $_POST['selected_ids'] ?? []));
         if (empty($ids)) {
-            $deleteErrors[] = 'Aucun document selectionne.';
+            $deleteErrors[] = 'Aucun document sélectionné.';
         } else {
             $in = implode(',', array_fill(0, count($ids), '?'));
             $stmt = $pdo->prepare("DELETE FROM documents WHERE id IN ($in)");
             if ($stmt->execute($ids)) {
-                $deleteSuccess[] = 'Documents supprimes.';
+                $deleteSuccess[] = 'Documents supprimés.';
             } else {
                 $deleteErrors[] = 'Erreur lors de la suppression multiple.';
             }
@@ -84,7 +84,7 @@ if ($tableReady && is_post()) {
                 $stmt = $pdo->prepare('DELETE FROM documents WHERE id = :id');
                 $stmt->execute([':id' => $docId]);
                 if ($stmt->rowCount() > 0) {
-                    $deleteSuccess[] = 'Document supprime.';
+                    $deleteSuccess[] = 'Document supprimé.';
                 } else {
                     $deleteErrors[] = 'Document introuvable.';
                 }
@@ -94,7 +94,7 @@ if ($tableReady && is_post()) {
         }
     } else {
         if (!isset($_FILES['documents'])) {
-            $uploadErrors[] = 'Aucun fichier selectionne.';
+            $uploadErrors[] = 'Aucun fichier sélectionné.';
         } else {
             $files = $_FILES['documents'];
             $total = is_array($files['name']) ? count($files['name']) : 0;
@@ -113,7 +113,7 @@ if ($tableReady && is_post()) {
                 $size = (int)($files['size'][$i] ?? 0);
 
                 if ($error !== UPLOAD_ERR_OK || !is_uploaded_file($tmpName)) {
-                    $uploadErrors[] = "Echec du televersement pour {$originalName}.";
+                    $uploadErrors[] = "Échec du téléversement pour {$originalName}.";
                     continue;
                 }
 
@@ -170,8 +170,8 @@ ob_start();
     <article class="rounded-3xl border border-[#e3d7cc] bg-white p-6">
             <div class="flex items-start justify-between gap-4">
                 <div>
-                    <p class="text-sm font-semibold text-[#0f0f0f]">Deposer des documents</p>
-                    <p class="mt-2 text-sm text-[#6d6258]">Glissez vos fichiers ici ou cliquez pour les ajouter. Tous formats acceptes.</p>
+                    <p class="text-sm font-semibold text-[#0f0f0f]">Déposer des documents</p>
+                    <p class="mt-2 text-sm text-[#6d6258]">Glissez vos fichiers ici ou cliquez pour les ajouter. Tous formats acceptés.</p>
                 </div>
         </div>
 
@@ -204,15 +204,10 @@ ob_start();
         <form id="documents-form" class="mt-6 space-y-4" method="post" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
             <input type="hidden" name="action" value="upload">
-            <label id="drop-area" class="relative flex cursor-pointer items-center gap-3 rounded-full border border-dashed border-[#d3c6ba] bg-[#f9f3ed] px-6 py-4 text-sm text-[#6d6258] shadow-sm hover:border-[#1f2d3a] hover:text-[#1f2d3a]">
+            <label id="drop-area" class="relative flex h-44 cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border border-dashed border-[#d3c6ba] bg-[#f9f3ed] px-4 text-center text-sm text-[#6d6258] hover:border-[#1f2d3a] hover:text-[#1f2d3a]">
                 <input id="documents-input" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" type="file" name="documents[]" multiple accept="*/*">
-                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-[#1f2d3a] shadow-inner">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
-                </span>
-                <div class="flex flex-col text-left leading-tight">
-                    <span class="text-sm font-semibold text-[#0f0f0f]">Glisser-deposer vos fichiers</span>
-                    <span class="text-xs text-[#6d6258]">Ou cliquez - Tous formats - Max 5 fichiers - 20 Mo/fichier</span>
-                </div>
+                <span class="text-sm font-semibold text-[#0f0f0f]">Glisser-deposer vos fichiers</span>
+                <span class="text-xs text-[#6d6258]">Ou cliquez pour parcourir - Tous formats - Max 5 fichiers - 20 Mo/fichier</span>
             </label>
             <div id="pending-list" class="rounded-2xl border border-[#e3d7cc] bg-[#f6f1eb] px-4 py-4 text-sm text-[#6d6258] hidden"></div>
             <button
@@ -236,7 +231,7 @@ ob_start();
                     <div class="flex items-center gap-2">
                         <button id="toggle-select" type="button" class="inline-flex items-center gap-2 rounded-full border border-[#e3d7cc] px-4 py-2 text-sm font-semibold text-[#1f2d3a]">
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18M3 12h18M3 19h18"/></svg>
-                            Selectionner
+                            Sélectionner
                         </button>
                         <button id="bulk-delete-btn" class="hidden inline-flex items-center gap-2 rounded-full bg-[#b3261e] px-4 py-2 text-sm font-semibold text-white hover:bg-[#921c17]" type="submit" form="documents-list-form" disabled>
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6v12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V6M10 6V4a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v2"/></svg>
@@ -252,7 +247,7 @@ ob_start();
                 </div>
             <?php elseif (empty($documents)): ?>
                 <div class="mt-6 rounded-2xl border border-[#e3d7cc] bg-[#f9f3ed] px-4 py-4 text-sm text-[#6d6258]">
-                    Aucun fichier pour le moment. Deposez vos documents pour les retrouver ici.
+                    Aucun fichier pour le moment. Déposez vos documents pour les retrouver ici.
                 </div>
             <?php else: ?>
                 <ul class="mt-6 divide-y divide-[#efe7df]">
@@ -272,7 +267,7 @@ ob_start();
                                 <a class="rounded-full border border-[#e3d7cc] p-2 text-[#1f2d3a]" href="/documents/download?id=<?= e((string)$document['id']) ?>" target="_blank" rel="noreferrer" aria-label="Ouvrir">
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
                                 </a>
-                                <a class="rounded-full bg-[#1f2d3a] p-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1" aria-label="Telecharger">
+                                    <a class="rounded-full bg-[#1f2d3a] p-2 font-semibold text-white" href="/documents/download?id=<?= e((string)$document['id']) ?>&download=1" aria-label="Télécharger">
                                     <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 13l-7 7-7-7"/></svg>
                                 </a>
                                 <form method="post" class="inline">
@@ -316,10 +311,10 @@ render_modal(
 render_modal(
     'limit-modal',
     'Trop de fichiers',
-    'Selection',
+    'Sélection',
     '<p class="text-sm text-[#6d6258]">Choisissez jusqu\'a 5 fichiers a conserver.</p>
-    <div id="limit-error" class="mt-2 text-sm text-[#b3261e] hidden"></div>
-    <div id="limit-files-list" class="mt-3 max-h-64 space-y-2 overflow-auto"></div>',
+            <div id="limit-error" class="mt-2 text-sm text-[#b3261e] hidden"></div>
+            <div id="limit-files-list" class="mt-3 max-h-64 space-y-2 overflow-auto"></div>',
     '<div class="flex flex-wrap items-center gap-3">
         <button id="limit-confirm" class="inline-flex items-center gap-2 rounded-full bg-[#1f2d3a] px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="button">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>
@@ -484,7 +479,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .filter((cb) => cb.checked)
             .map((cb) => parseInt(cb.dataset.index || '0', 10));
         if (selectedIndexes.length === 0 || selectedIndexes.length > MAX_FILES) {
-            limitError.textContent = `Selectionnez jusqu'a ${MAX_FILES} fichiers.`;
+            limitError.textContent = `Sélectionnez jusqu'à ${MAX_FILES} fichiers.`;
             limitError.classList.remove('hidden');
             return;
         }
@@ -539,9 +534,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const row = cb.closest('.document-row');
                 if (!row) return;
                 if (cb.checked) {
-                    row.classList.add('ring-2', 'ring-[#1f2d3a]');
+                    row.classList.add('bg-[#1f2d3a]/8', 'border', 'border-[#1f2d3a]/25', 'shadow-sm');
                 } else {
-                    row.classList.remove('ring-2', 'ring-[#1f2d3a]');
+                    row.classList.remove('bg-[#1f2d3a]/8', 'border', 'border-[#1f2d3a]/25', 'shadow-sm');
                 }
             });
         };
@@ -562,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cb.checked = false;
                     cb.classList.add('hidden');
                     const row = cb.closest('.document-row');
-                    if (row) row.classList.remove('ring-2', 'ring-[#1f2d3a]', 'cursor-pointer');
+                    if (row) row.classList.remove('bg-[#1f2d3a]/8', 'border', 'border-[#1f2d3a]/25', 'shadow-sm', 'cursor-pointer');
                 });
                 bulkDeleteBtn.disabled = true;
             }

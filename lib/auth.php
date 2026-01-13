@@ -30,9 +30,9 @@ function require_auth(PDO $pdo): array
     if (!$user) {
         if (!empty($_SESSION['inactive_user'])) {
             unset($_SESSION['inactive_user']);
-            header('Location: /connexion?inactive=1');
+            header('Location: /login?inactive=1');
         } else {
-            header('Location: /connexion');
+            header('Location: /login');
         }
         exit;
     }

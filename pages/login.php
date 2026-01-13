@@ -10,12 +10,12 @@ if (current_user($pdo)) {
 }
 
 if (isset($_GET['inactive'])) {
-    $error = 'Votre compte est desactive. Contactez un administrateur.';
+    $error = 'Votre compte est désactivé. Contactez un administrateur.';
 }
 
 if (is_post()) {
     if (!csrf_verify($_POST['csrf_token'] ?? null)) {
-        $error = 'Jeton de securite invalide.';
+    $error = 'Jeton de sécurité invalide.';
     } elseif (!login_attempt_allowed()) {
         $error = 'Trop de tentatives. Reessayez dans une minute.';
     } else {
@@ -37,7 +37,7 @@ if (is_post()) {
             header('Location: /dashboard');
             exit;
         } elseif ($user && (int)$user['is_active'] !== 1) {
-            $error = 'Votre compte est desactive. Contactez un administrateur.';
+            $error = 'Votre compte est désactivé. Contactez un administrateur.';
         } else {
             record_login_attempt();
             $error = 'Identifiants invalides.';

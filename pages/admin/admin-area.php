@@ -13,7 +13,7 @@ $successes = [];
 if (is_post()) {
     $action = $_POST['action'] ?? 'create';
     if (!csrf_verify($_POST['csrf_token'] ?? null)) {
-        $errors[] = 'Jeton de securite invalide.';
+        $errors[] = 'Jeton de sécurité invalide.';
     } elseif ($action === 'create') {
         $name = trim((string)($_POST['name'] ?? ''));
         $email = trim((string)($_POST['email'] ?? ''));
@@ -27,7 +27,7 @@ if (is_post()) {
             $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email LIMIT 1');
             $stmt->execute([':email' => $email]);
             if ($stmt->fetch()) {
-                $errors[] = 'Cet email existe deja.';
+                $errors[] = 'Cet email existe déjà.';
             } else {
                 $hash = password_hash($password, PASSWORD_DEFAULT);
                 $insert = $pdo->prepare('INSERT INTO users (email, name, password_hash, role, is_active) VALUES (:email, :name, :hash, :role, :active)');
@@ -38,7 +38,7 @@ if (is_post()) {
                     ':role' => $role,
                     ':active' => $isActive,
                 ]);
-                $successes[] = 'Compte cree avec succes.';
+                $successes[] = 'Compte créé avec succès.';
             }
         }
     } elseif ($action === 'update') {
@@ -50,12 +50,12 @@ if (is_post()) {
         $password = (string)($_POST['edit_password'] ?? '');
 
         if ($userId <= 0 || $email === '') {
-            $errors[] = 'Selectionnez un utilisateur et renseignez un email.';
+            $errors[] = 'Sélectionnez un utilisateur et renseignez un email.';
         } else {
             $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email AND id <> :id LIMIT 1');
             $stmt->execute([':email' => $email, ':id' => $userId]);
             if ($stmt->fetch()) {
-                $errors[] = 'Un autre compte utilise deja cet email.';
+                $errors[] = 'Un autre compte utilise déjà cet email.';
             } else {
                 $fields = [
                     'name' => $name,
@@ -82,9 +82,9 @@ if (is_post()) {
                     }
                     $stmt->bindValue(':id', $fields['id'], PDO::PARAM_INT);
                     $stmt->execute();
-                    $successes[] = 'Compte mis a jour.';
+                    $successes[] = 'Compte mis à jour.';
                 } catch (Throwable $e) {
-                    $errors[] = 'Impossible de mettre a jour le compte : ' . $e->getMessage();
+                    $errors[] = 'Impossible de mettre à jour le compte : ' . $e->getMessage();
                 }
             }
         }
@@ -102,7 +102,7 @@ if (is_post()) {
                 $newStatus = (int)$row['is_active'] === 1 ? 0 : 1;
                 $update = $pdo->prepare('UPDATE users SET is_active = :status WHERE id = :id');
                 $update->execute([':status' => $newStatus, ':id' => $userId]);
-                $successes[] = $newStatus === 1 ? 'Compte reactive.' : 'Compte desactive.';
+                $successes[] = $newStatus === 1 ? 'Compte réactivé.' : 'Compte désactivé.';
             }
         }
     } elseif ($action === 'delete') {
@@ -114,7 +114,7 @@ if (is_post()) {
         } else {
             $delete = $pdo->prepare('DELETE FROM users WHERE id = :id');
             $delete->execute([':id' => $userId]);
-            $successes[] = 'Compte supprime.';
+            $successes[] = 'Compte supprimé.';
         }
     }
 }
@@ -124,7 +124,7 @@ $users = $stmt->fetchAll();
 
 $pageEyebrow = 'Administration';
 $pageTitle = 'Espace admin';
-$pageLead = 'Gerez les comptes et acces a Cube Portal.';
+$pageLead = 'Gérez les comptes et accès à Cube Portal.';
 
 ob_start();
 ?>
@@ -146,7 +146,7 @@ ob_start();
             id="open-create"
             class="rounded-full bg-[#1f2d3a] px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30"
         >
-            Creer un compte
+            Créer un compte
         </button>
     </div>
     <div class="mt-6 overflow-x-auto">
@@ -197,8 +197,8 @@ ob_start();
                                     <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                                     <input type="hidden" name="action" value="toggle">
                                     <input type="hidden" name="user_id" value="<?= e((string)$row['id']) ?>">
-                                    <button class="rounded-full border border-[#e3d7cc] px-4 py-2 text-xs font-semibold text-[#1f2d3a]" type="submit" aria-label="<?= $isActive ? 'Desactiver' : 'Reactiver' ?>">
-                                        <?= $isActive ? 'Desactiver' : 'Reactiver' ?>
+                                    <button class="rounded-full border border-[#e3d7cc] px-4 py-2 text-xs font-semibold text-[#1f2d3a]" type="submit" aria-label="<?= $isActive ? 'Désactiver' : 'Réactiver' ?>">
+                                        <?= $isActive ? 'Désactiver' : 'Réactiver' ?>
                                     </button>
                                 </form>
                                 <form method="post" class="delete-user-form">
@@ -269,8 +269,8 @@ render_modal(
 
 render_modal(
     'create-modal',
-    'Creer un compte',
-    'Creation',
+    'Créer un compte',
+    'Création',
     '
     <form method="post" class="mt-3 grid gap-4" id="create-form">
         <input type="hidden" name="csrf_token" value="' . e(csrf_token()) . '">
@@ -302,7 +302,7 @@ render_modal(
             Compte actif
         </label>
         <div class="flex flex-wrap gap-3">
-            <button class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="submit">Creer</button>
+            <button class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" type="submit">Créer</button>
             <button type="button" id="create-cancel" class="rounded-full border border-[#e3d7cc] px-6 py-3 text-sm font-semibold text-[#1f2d3a]">Annuler</button>
         </div>
     </form>
