@@ -163,35 +163,41 @@ ob_start();
             </thead>
             <tbody class="text-[#2b2723]">
                 <?php foreach ($users as $row): ?>
+                    <?php $isActive = (int)$row['is_active'] === 1; ?>
                     <tr class="border-t border-[#efe7df]">
                         <td class="py-3"><?= e($row['name'] ?: '-') ?></td>
                         <td class="py-3"><?= e($row['email']) ?></td>
                         <td class="py-3"><?= e($row['role']) ?></td>
-                        <td class="py-3"><?= (int)$row['is_active'] === 1 ? 'Actif' : 'Inactif' ?></td>
+                        <td class="py-3">
+                            <span class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold <?= $isActive ? 'border-[#0f8a3c] bg-[#14a44d]/10 text-[#0d6e30]' : 'border-[#b3261e] bg-[#b3261e]/10 text-[#921c17]' ?>">
+                                <?= $isActive ? 'Actif' : 'Inactif' ?>
+                            </span>
+                        </td>
                         <td class="py-3"><?= e($row['created_at']) ?></td>
                         <td class="py-3">
                             <div class="flex flex-wrap gap-2">
                                 <button
-                                    class="rounded-full border border-[#e3d7cc] px-3 py-2 text-xs font-semibold text-[#1f2d3a]"
+                                    class="flex items-center gap-2 rounded-full border border-[#e3d7cc] px-3 py-2 text-xs font-semibold text-[#1f2d3a]"
                                     type="button"
                                     data-edit="true"
                                     data-id="<?= e((string)$row['id']) ?>"
                                     data-name="<?= e($row['name'] ?? '') ?>"
                                     data-email="<?= e($row['email'] ?? '') ?>"
                                     data-role="<?= e($row['role'] ?? 'user') ?>"
-                                    data-active="<?= (int)$row['is_active'] === 1 ? '1' : '0' ?>"
+                                    data-active="<?= $isActive ? '1' : '0' ?>"
                                 >
+                                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M13.5 6.5l4 4" />
+                                        <path d="M4 20l3.5-.5L17 10l-3-3L4.5 16.5 4 20z" />
+                                    </svg>
                                     Modifier
                                 </button>
                                 <form method="post">
                                     <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
                                     <input type="hidden" name="action" value="toggle">
                                     <input type="hidden" name="user_id" value="<?= e((string)$row['id']) ?>">
-                                    <button class="rounded-full border border-[#e3d7cc] p-2 text-xs font-semibold text-[#1f2d3a]" type="submit" aria-label="<?= (int)$row['is_active'] === 1 ? 'Desactiver' : 'Reactiver' ?>">
-                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M5 12h14" />
-                                            <path d="M12 5v14" />
-                                        </svg>
+                                    <button class="rounded-full border border-[#e3d7cc] px-4 py-2 text-xs font-semibold text-[#1f2d3a]" type="submit" aria-label="<?= $isActive ? 'Desactiver' : 'Reactiver' ?>">
+                                        <?= $isActive ? 'Desactiver' : 'Reactiver' ?>
                                     </button>
                                 </form>
                                 <form method="post" class="delete-user-form">
