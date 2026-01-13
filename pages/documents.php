@@ -351,7 +351,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const limitConfirm = document.getElementById('limit-confirm');
     const limitCancel = document.getElementById('limit-cancel');
     const toggleSelectBtn = document.getElementById('toggle-select');
-    const bulkForm = document.getElementById('documents-list-form');
+    const documentsListForm = document.getElementById('documents-list-form');
+    const bulkBar = document.getElementById('bulk-delete-form');
     const bulkDeleteBtn = document.getElementById('bulk-delete-btn');
     if (!input || !dropArea || !pendingList || !importButton || !deleteModal || !deleteModalName || !confirmDeleteBtn || !cancelDeleteBtn || !limitModal || !limitList || !limitError || !limitConfirm || !limitCancel) return;
 
@@ -533,7 +534,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Mode selection multiple pour suppression
-    if (toggleSelectBtn && bulkForm && bulkDeleteBtn) {
+    if (toggleSelectBtn && documentsListForm && bulkBar && bulkDeleteBtn) {
         const checkboxes = Array.from(document.querySelectorAll('.selection-checkbox'));
         const updateBulkState = () => {
             const anyChecked = checkboxes.some((cb) => cb.checked);
@@ -543,11 +544,11 @@ document.addEventListener('DOMContentLoaded', () => {
             selectionMode = !selectionMode;
             if (selectionMode) {
                 toggleSelectBtn.classList.add('bg-[#1f2d3a]', 'text-white');
-                bulkForm.classList.remove('hidden');
+                bulkBar.classList.remove('hidden');
                 checkboxes.forEach((cb) => cb.classList.remove('hidden'));
             } else {
                 toggleSelectBtn.classList.remove('bg-[#1f2d3a]', 'text-white');
-                bulkForm.classList.add('hidden');
+                bulkBar.classList.add('hidden');
                 checkboxes.forEach((cb) => {
                     cb.checked = false;
                     cb.classList.add('hidden');
@@ -556,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
         checkboxes.forEach((cb) => cb.addEventListener('change', updateBulkState));
-        bulkForm.addEventListener('submit', (e) => {
+        documentsListForm.addEventListener('submit', (e) => {
             if (bulkDeleteBtn.disabled) {
                 e.preventDefault();
             }
