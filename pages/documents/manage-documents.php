@@ -534,9 +534,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const row = cb.closest('.document-row');
                 if (!row) return;
                 if (cb.checked) {
-                    row.classList.add('bg-[#1f2d3a]/8', 'border', 'border-[#1f2d3a]/25', 'shadow-sm');
+                    row.classList.add('bg-[#efe7df]', 'border', 'border-[#1f2d3a]/50', 'shadow-sm', 'ring-2', 'ring-[#1f2d3a]/15');
                 } else {
-                    row.classList.remove('bg-[#1f2d3a]/8', 'border', 'border-[#1f2d3a]/25', 'shadow-sm');
+                    row.classList.remove('bg-[#efe7df]', 'border', 'border-[#1f2d3a]/50', 'shadow-sm', 'ring-2', 'ring-[#1f2d3a]/15');
                 }
             });
         };
@@ -557,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     cb.checked = false;
                     cb.classList.add('hidden');
                     const row = cb.closest('.document-row');
-                    if (row) row.classList.remove('bg-[#1f2d3a]/8', 'border', 'border-[#1f2d3a]/25', 'shadow-sm', 'cursor-pointer');
+                    if (row) row.classList.remove('bg-[#efe7df]', 'border', 'border-[#1f2d3a]/50', 'shadow-sm', 'ring-2', 'ring-[#1f2d3a]/15', 'cursor-pointer');
                 });
                 bulkDeleteBtn.disabled = true;
             }
