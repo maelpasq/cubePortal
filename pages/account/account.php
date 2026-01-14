@@ -16,8 +16,9 @@ if (is_post()) {
     if (!csrf_verify($_POST['csrf_token'] ?? null)) {
         $errors[] = 'Jeton de securite invalide.';
     } else {
-        $name = trim((string)($_POST['name'] ?? ''));
-        $email = trim((string)($_POST['email'] ?? ''));
+        $isAdmin = ($user['role'] ?? '') === 'admin';
+        $name = $isAdmin ? trim((string)($_POST['name'] ?? '')) : (string)($user['name'] ?? '');
+        $email = $isAdmin ? trim((string)($_POST['email'] ?? '')) : (string)($user['email'] ?? '');
         $password = (string)($_POST['password'] ?? '');
         $passwordConfirm = (string)($_POST['password_confirm'] ?? '');
 
@@ -29,7 +30,7 @@ if (is_post()) {
             $errors[] = 'Les mots de passe ne correspondent pas.';
         }
 
-        if ($email !== '') {
+        if ($isAdmin && $email !== '') {
             $stmt = $pdo->prepare('SELECT id FROM users WHERE email = :email AND id <> :id LIMIT 1');
             $stmt->execute([':email' => $email, ':id' => $user['id']]);
             if ($stmt->fetch()) {
@@ -39,24 +40,32 @@ if (is_post()) {
 
         if (empty($errors)) {
             $fields = [
-                ':name' => $name,
-                ':email' => $email,
                 ':id' => $user['id'],
             ];
-            $setParts = ['name = :name', 'email = :email'];
+            $setParts = [];
+            if ($isAdmin) {
+                $fields[':name'] = $name;
+                $fields[':email'] = $email;
+                $setParts[] = 'name = :name';
+                $setParts[] = 'email = :email';
+            }
             if ($password !== '') {
                 $fields[':password_hash'] = password_hash($password, PASSWORD_DEFAULT);
                 $setParts[] = 'password_hash = :password_hash';
             }
-            $setSql = implode(', ', $setParts);
+            if (empty($setParts)) {
+                $errors[] = 'Aucune modification a enregistrer.';
+            } else {
+                $setSql = implode(', ', $setParts);
 
-            try {
-                $stmt = $pdo->prepare("UPDATE users SET {$setSql} WHERE id = :id");
-                $stmt->execute($fields);
-                $successes[] = 'Compte mis a jour.';
-                $user = current_user($pdo) ?? $user;
-            } catch (Throwable $e) {
-                $errors[] = 'Impossible de mettre a jour le compte : ' . $e->getMessage();
+                try {
+                    $stmt = $pdo->prepare("UPDATE users SET {$setSql} WHERE id = :id");
+                    $stmt->execute($fields);
+                    $successes[] = 'Compte mis a jour.';
+                    $user = current_user($pdo) ?? $user;
+                } catch (Throwable $e) {
+                    $errors[] = 'Impossible de mettre a jour le compte : ' . $e->getMessage();
+                }
             }
         }
     }
@@ -64,6 +73,7 @@ if (is_post()) {
 
 $profileName = trim((string)($user['name'] ?? ''));
 $profileEmail = trim((string)($user['email'] ?? ''));
+$isAdmin = ($user['role'] ?? '') === 'admin';
 $initialsSource = $profileName !== '' ? $profileName : $profileEmail;
 $initials = '';
 if ($initialsSource !== '') {
@@ -102,13 +112,13 @@ ob_start();
             <input type="hidden" name="csrf_token" value="<?= e(csrf_token()) ?>">
             <label class="block text-sm font-medium text-[#2b2723]">
                 Nom complet
-                <input type="text" name="name" value="<?= e($profileName) ?>"
-                       class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+                <input type="text" name="name" value="<?= e($profileName) ?>" <?= $isAdmin ? '' : 'readonly' ?>
+                       class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none <?= $isAdmin ? '' : 'text-[#6d6258]' ?>">
             </label>
             <label class="block text-sm font-medium text-[#2b2723]">
                 Email
-                <input type="email" name="email" required value="<?= e($profileEmail) ?>"
-                       class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none">
+                <input type="email" name="email" required value="<?= e($profileEmail) ?>" <?= $isAdmin ? '' : 'readonly' ?>
+                       class="mt-2 w-full rounded-2xl border border-[#e3d7cc] bg-white px-4 py-3 text-sm focus:border-[#1f2d3a] focus:outline-none <?= $isAdmin ? '' : 'text-[#6d6258]' ?>">
             </label>
             <label class="block text-sm font-medium text-[#2b2723]">
                 Nouveau mot de passe
