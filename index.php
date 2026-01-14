@@ -13,6 +13,7 @@ $routes = [
     '/dashboard' => __DIR__ . '/pages/dashboard/dashboard.php',
     '/documents' => __DIR__ . '/pages/documents/manage-documents.php',
     '/documents/download' => __DIR__ . '/pages/documents/document-download.php',
+    '/mon-compte' => __DIR__ . '/pages/account/account.php',
     '/admin' => __DIR__ . '/pages/admin/admin-area.php',
     '/logout' => __DIR__ . '/pages/logout.php',
 ];

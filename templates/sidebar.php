@@ -1,6 +1,26 @@
 <?php
 $active = $active ?? '';
 $integrations = $integrations ?? [];
+$user = $user ?? null;
+
+$profileName = is_array($user) ? trim((string)($user['name'] ?? '')) : '';
+$profileEmail = is_array($user) ? trim((string)($user['email'] ?? '')) : '';
+$initialsSource = $profileName !== '' ? $profileName : $profileEmail;
+$initials = '';
+if ($initialsSource !== '') {
+    $parts = preg_split('/\s+/', $initialsSource) ?: [];
+    foreach ($parts as $part) {
+        if ($part === '') {
+            continue;
+        }
+        $letter = function_exists('mb_substr') ? mb_substr($part, 0, 1) : substr($part, 0, 1);
+        $initials .= $letter;
+        if (strlen($initials) >= 2) {
+            break;
+        }
+    }
+    $initials = function_exists('mb_strtoupper') ? mb_strtoupper($initials) : strtoupper($initials);
+}
 ?>
 <aside class="flex h-full flex-col gap-8 border-r border-[#e3d7cc] bg-white px-6 py-8 lg:sticky lg:top-0 lg:h-screen lg:overflow-hidden">
     <div>
@@ -58,8 +78,16 @@ $integrations = $integrations ?? [];
             </svg>
             <span>Se deconnecter</span>
         </a>
-        <div class="rounded-3xl border border-[#e3d7cc] bg-[#f9f3ed] px-4 py-4 text-xs text-[#6d6258]">
-            Acces securise. Pensez a changer le mot de passe apres la premiere connexion.
-        </div>
+        <?php if ($user): ?>
+            <a class="flex items-center gap-3 rounded-3xl border border-[#e3d7cc] px-4 py-3 text-sm text-[#2b2723] transition <?= $active === 'account' ? 'bg-[#efe7df] text-[#0f0f0f]' : 'bg-white hover:bg-[#f6f1eb]' ?>" href="/mon-compte">
+                <div class="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#1f2d3a] text-sm font-semibold text-white">
+                    <?= e($initials !== '' ? $initials : 'CP') ?>
+                </div>
+                <div class="min-w-0">
+                    <p class="truncate text-sm font-semibold text-[#0f0f0f]"><?= e($profileName !== '' ? $profileName : $profileEmail) ?></p>
+                    <p class="truncate text-xs text-[#6d6258]"><?= e($profileEmail) ?></p>
+                </div>
+            </a>
+        <?php endif; ?>
     </div>
 </aside>
