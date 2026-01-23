@@ -34,16 +34,6 @@ $user = current_user($pdo);
                 <a class="rounded-full bg-[#1f2d3a] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-[#1f2d3a]/30" href="/login">Accéder au portail</a>
                 <a class="rounded-full border border-[#1f2d3a] px-6 py-3 text-sm font-semibold text-[#1f2d3a]" href="#features">Voir les modules</a>
             </div>
-            <div class="mt-10 grid gap-4 sm:grid-cols-2">
-                <div class="rounded-3xl border border-[#e3d7cc] bg-white px-5 py-4">
-                    <p class="text-sm font-semibold">Priorite du jour</p>
-                    <p class="mt-2 text-sm text-[#6d6258]">Suivi du Cube #4 et alignement des livrables.</p>
-                </div>
-                <div class="rounded-3xl border border-[#e3d7cc] bg-white px-5 py-4">
-                    <p class="text-sm font-semibold">Nouveaux acces</p>
-                    <p class="mt-2 text-sm text-[#6d6258]">2 comptes en attente de validation admin.</p>
-                </div>
-            </div>
         </div>
 
         <div class="rounded-[32px] border border-[#e3d7cc] bg-[#0f0f0f] p-8 text-white shadow-2xl">
